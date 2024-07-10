@@ -13,6 +13,7 @@ class services_dbhandler {
     private  $_username;
     private  $_password;
     private  $_database;
+    private  $_port;
     
     private static $connected = false;
     private static $link;
@@ -29,12 +30,13 @@ class services_dbhandler {
     private static $instance;
     private $em;
     
-    private function __construct($server, $username, $password, $database) {
+    private function __construct($server, $username, $password, $database, $port) {
 
         $this->_server   = $server;
         $this->_username = $username;
         $this->_password = $password;
         $this->_database = $database;
+        $this->_port = $port;
         
         $this->em = new exceptionMgr(" ");     
     }
@@ -44,7 +46,7 @@ class services_dbhandler {
 
         if(services_dbhandler::$connected == false) {
             try {
-                services_dbhandler::$link = @mysqli_connect($this->_server, $this->_username, $this->_password, $this->_database);
+                services_dbhandler::$link = @mysqli_connect($this->_server, $this->_username, $this->_password, $this->_database, $this->_port);
 			   
                 if (!is_object(services_dbhandler::$link)) {
                     self::$error = 'Error Code : ' .mysqli_connect_errno() . ' Error : ' . mysqli_connect_error();
@@ -70,11 +72,11 @@ class services_dbhandler {
    
      public static function getInstance()  {
      
-	    global $cfg_dbhost,$cfg_dbuser,$cfg_dbpassword,$cfg_database;
+	    global $cfg_dbhost,$cfg_dbuser,$cfg_dbpassword,$cfg_database,$cfg_port;
 	
 
         if (!services_dbhandler::$instance instanceof self) {
-            services_dbhandler::$instance = new self($cfg_dbhost,$cfg_dbuser,$cfg_dbpassword,$cfg_database);
+            services_dbhandler::$instance = new self($cfg_dbhost,$cfg_dbuser,$cfg_dbpassword,$cfg_database,$cfg_port);
         }
         return services_dbhandler::$instance;
      }

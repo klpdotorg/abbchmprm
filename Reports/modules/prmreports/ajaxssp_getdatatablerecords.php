@@ -85,7 +85,8 @@ $sql_details = array(
     'user' => $cfg_dbuser,
     'pass' => $cfg_dbpassword,
     'db'   => $cfg_database,
-    'host' => $cfg_dbhost
+    'host' => $cfg_dbhost,
+    'port' => $cfg_port
 );
 
 
