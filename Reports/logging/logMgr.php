@@ -1,5 +1,8 @@
 <?php
-session_start();
+// session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 /**
 * File: logMgr.php
 *
@@ -123,8 +126,10 @@ class logMgr {
 
 			  if($this->logrolloversize != 0) {
 				  $fsize = 0;
-				  if(file_exists($this->logfhandle)) {
-				    if(!($fsize = filesize($this->logfhandle))) {
+				//   if(file_exists($this->logfhandle)) {
+				    // if(!($fsize = filesize($this->logfhandle))) {
+				  if(file_exists($this->logfilename)) {
+    				if(!($fsize = filesize($this->logfilename))) {
                       throw new exceptionMgr("Failed with filesize in writeToLog.");
 				    }
 				  }
@@ -150,22 +155,12 @@ class logMgr {
     }
 
     private function openLogFile() {
-        
-		  try {
-                if(!($this->logfhandle = @fopen($this->logfilename,"a"))) {  // @ at the beggining to hide any error output
-				   throw new exceptionMgr("Failed to open logfile (".$this->logfilename);
-			    }
-		  }
-          catch (exceptionMgr $e) {
-                $e->handleError();
-          }
-		  catch(Exception $e) {
-				try {
-                  throw new exceptionMgr("Failed to open logfile (".$logfilename);
-				}
-                catch (exceptionMgr $e) {
-                  $e->handleError();
-                }
+
+		  if(!($this->logfhandle = @fopen($this->logfilename,"a"))) {  // @ at the beginning to hide any error output
+		      // Do NOT call exceptionMgr/writeToLog here — that would cause infinite recursion
+		      // (openLogFile → exceptionMgr::handleError → writeToLog → openLogFile → ...)
+		      error_log("logMgr: Failed to open logfile (".$this->logfilename.")");
+		      throw new Exception("Failed to open logfile (".$this->logfilename.")");
 		  }
 	}
 
@@ -181,7 +176,7 @@ class logMgr {
 					  throw new exceptionMgr("Failed to delete logfile while roll-over.");
 				  }
 			  }
-              $counts -= 1; // decrement the count
+              $count -= 1; // decrement the count
 
               do {
 			     $sfname = $this->logfilename.$count;      // file to rename
@@ -192,8 +187,8 @@ class logMgr {
 					   throw new exceptionMgr("Failed to rename archive logfile".$count." while roll-over.");
 					 }
 			     }
-                 $counts -= 1; // decrement the count
-		      }while($count == 0);
+                 $count -= 1; // decrement the count
+		      }while($count > 0);
 
 			  // now copy the current file
               if(file_exists($this->logfilename)) {

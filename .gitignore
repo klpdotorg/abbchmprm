@@ -20,3 +20,12 @@
 assets/bb5_0_5
 assets/userprogress/logfiles/abslog.log6
 logfiles/abslog.log6
+
+# Firebase
+*.json
+cron/*.json
+
+# DB configs
+config/dbconfig.php
+Reports/config/dbconfig.php
+.env

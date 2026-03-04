@@ -393,9 +393,21 @@ function getDistrictFromGeocode($lat, $lng) {
 }
 
 function updateDistrict($district,$childid) {
-    
+
     $servicefunctions_dao = new servicefunctions_dao();
     $servicefunctions_dao->updateDistrict($district, $childid);
+}
+
+function saveFcmToken($childid, $fcm_token) {
+
+    $servicefunctions_dao = new servicefunctions_dao();
+    return $servicefunctions_dao->saveFcmToken($childid, $fcm_token);
+}
+
+function updateLastLogin($childid) {
+
+    $servicefunctions_dao = new servicefunctions_dao();
+    return $servicefunctions_dao->updateLastLogin($childid);
 }
 
 ?>

@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  web:
+    image: php:7.4-apache
+    container_name: php_apache
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+    command: >
+      bash -c "
+      docker-php-ext-install mysqli pdo pdo_mysql &&
+      a2enmod rewrite &&
+      apache2-foreground
+      "
+    # user: "1000:1000"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      # PMA_USER: root
+      # PMA_PASSWORD: root
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+    depends_on:
+      - db
+
+  # cron:
+  #   image: php:7.4-apache
+  #   container_name: php_cron
+  #   volumes:
+  #     - .:/var/www/html
+  #   depends_on:
+  #     - db
+  #   command: >
+  #     bash -c "
+  #     docker-php-ext-install mysqli pdo pdo_mysql &&
+  #     apt-get update &&
+  #     apt-get install -y cron &&
+  #     crontab -l | { cat; echo '*/5 * * * * php /var/www/html/cron/push_notification_cron.php >> /var/www/html/cron/push_cron.log 2>&1'; } | crontab - &&
+  #     service cron start &&
+  #     tail -f /var/www/html/cron/push_cron.log
+  #     "
+  #   restart: always
+
+volumes:
+  db_data:

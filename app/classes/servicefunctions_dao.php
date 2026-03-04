@@ -471,5 +471,25 @@ class servicefunctions_dao {
         }
     }
 
-}  // end of the Class 
+    function saveFcmToken($childid, $fcm_token) {
+
+        $data = array(
+            'fcm_token' => $fcm_token
+        );
+
+        $where_condition = "id_child = " . intval($childid);
+        return $this->dbh->updateRecords('child_tbl', $data, $where_condition);
+    }
+
+    function updateLastLogin($childid) {
+
+        $data = array(
+            'last_login' => date('Y-m-d H:i:s')
+        );
+
+        $where_condition = "id_child = " . intval($childid);
+        return $this->dbh->updateRecords('child_tbl', $data, $where_condition);
+    }
+
+}  // end of the Class
 ?>

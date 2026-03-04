@@ -1,5 +1,8 @@
 <?php
-    session_start();
+    // session_start();
+	if (session_status() === PHP_SESSION_NONE) {
+     session_start();
+    }
 
 /**
 * Class: auth_dao
@@ -8,7 +11,7 @@
 *
 */
 
-    if(!isset($_SESSION[EMRP_BASE_DIR])) {
+    if(!isset($_SESSION['EMRP_BASE_DIR'])) {
 		echo $app_strings['ERRMSG_INVALIDSESSION'];
 		exit();
  	 }

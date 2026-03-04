@@ -9,12 +9,13 @@
  * {
  * "name:"",
  * "grade":"",
- * "schooltype:"1/0", 
+ * "schooltype:"1/0",
  * "geo":"long,lat"
  * "language":""
  * "organization":""
  * "deviceid":""
  * "avatarpic":"picture image as base64 encoded string"
+ * "fcm_token":"" (optional - FCM device token for push notifications)
  * }
  *    
  * JSON Response:
@@ -68,6 +69,7 @@
         $organization = $data->{'organization'};
         $deviceid     = $data->{'deviceid'};
         $avatarpic    = $data->{'avatarpic'}; // The avatar image file as a base64 encoded string
+        $fcm_token    = isset($data->{'fcm_token'}) ? $data->{'fcm_token'} : null;
   
         if($childname && $deviceid && $grade && $language){
         
@@ -131,6 +133,14 @@
                       updateDistrict($district, $childid); 
                   }
                   
+                  // Save FCM token if provided at registration
+                  if ($fcm_token) {
+                      saveFcmToken($childid, $fcm_token);
+                  }
+
+                  // Registration counts as first login
+                  updateLastLogin($childid);
+
                   // Return the access_token on registration completion (considered as logged-in)
                   $access_token = createAccessToken();
                   $created_datetime = date('Y-m-d H:i:s') ;

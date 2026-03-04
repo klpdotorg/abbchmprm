@@ -38,6 +38,13 @@
    // $cfg_ekstepapi_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJjOTg2ZmFhYTNlMDg0NjU2YjBlMzA1NjBjNTU1NWE0ZSIsImlhdCI6MTUxMTUxNjI1NCwiZXhwIjoxNTQzMDUyMjU0LCJhdWQiOiJBa3NoYXJhIGZvdW5kYXRpb24iLCJzdWIiOiJqcm9ja2V0QGV4YW1wbGUuY29tIiwiR2l2ZW5OYW1lIjoiUHVzaHBhIiwiU3VybmFtZSI6IlRoYW50cnkiLCJFbWFpbCI6InB1c2hwYUBha3NoYXJhLm9yZy5pbiIsIlJvbGUiOlsiTWFuYWdlciIsIlByb2plY3QgQWRtaW5pc3RyYXRvciJdfQ.QVTgGmwF74STnpxZtRPsjM6DVdxmLOjkLb4m6WqqJZg';
    $cfg_ekstepapi_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmZjMwNWQ1NDg1YjQzNDFiZGEyZmViNmI5ZTU0NjBmYSJ9.O1z7wjXtXPweXL18aEuNwJxglRVrADTC-1o3Mp5GQQY';
    
+   // FCM Push Notification settings (v1 API with Service Account)
+   // Download Service Account JSON from: Firebase Console > Project Settings > Service Accounts > Generate new private key
+   // Path to your Firebase service account JSON file
+   $cfg_fcm_service_account_json_path = dirname(__FILE__) . '/../cron/building-blocks-b0332-firebase-adminsdk-uiekr-bfc23821a8.json';
+   // Your Firebase Project ID (found in service account JSON or Firebase Console)
+   $cfg_fcm_project_id = 'building-blocks-b0332';
+
    // Reverse Geocode API to get 'District' for given latitude/longitude values
    $cfg_reversegeocodeapi_provider = 'google'; // can use 'google' or 'mapmyindia'
    // mapmyindia API URL for getting District from lattitude/longitude values

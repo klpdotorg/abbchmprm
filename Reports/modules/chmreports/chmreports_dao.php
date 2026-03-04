@@ -1,6 +1,10 @@
 <?php
 
-  session_start();
+//   session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 
   require_once($_SESSION['EMRP_BASE_DIR']."/app/boot/checksandincludes.php");
 

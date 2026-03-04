@@ -1,12 +1,12 @@
 <?php
 	session_start();
 	
- if(!isset($_SESSION[SMAPP_BASE_DIR])) {
+ if(!isset($_SESSION['EMRP_BASE_DIR'])) {
 		echo "clickatellDriver: Unauthorised Access";
 		exit();
 	 }
-    require_once($_SESSION[SMAPP_BASE_DIR]."/app/boot/checksandincludes.php");
-    require_once($_SESSION[SMAPP_BASE_DIR]."/app/views/includes/include_directory_paths.php");
+    require_once($_SESSION['EMRP_BASE_DIR']."/app/boot/checksandincludes.php");
+    require_once($_SESSION['EMRP_BASE_DIR']."/app/views/includes/include_directory_paths.php");
     
    class kapsys_handler {
     

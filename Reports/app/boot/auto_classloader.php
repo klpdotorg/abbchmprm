@@ -1,5 +1,8 @@
 <?php
-session_start();
+// session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 /**
 * This file is to be included in all the PHP files (is added to checksandincludes.php)
 */
@@ -10,7 +13,8 @@ session_start();
 	// they are used. All the directories in the include path will be searched.
 	// this avoids the need to call require or include for all classes used in each of the php files
 	
-   function __autoload($classname) {
+//    function __autoload($classname) {
+spl_autoload_register(function ($classname) {
 	
       global $cfg_autoload_includepath_rootdirectory;
 
@@ -54,5 +58,5 @@ session_start();
       
       require_once($classname.".php"); // include the php file for the class (from any of the directories in the include path)
                                        // NOTE: The Class name and the PHP file in which the class is defined should be identical.
-	}
+	});
 ?>

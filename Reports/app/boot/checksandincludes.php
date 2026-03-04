@@ -1,5 +1,9 @@
 <?php
-session_start();
+// session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 /**
 * This file is to be included in all the PHP files. This file checks all initial sanity checks and include

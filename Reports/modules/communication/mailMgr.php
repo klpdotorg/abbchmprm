@@ -1,110 +1,157 @@
 <?php
-	session_start();
-	
+// session_start();
+if (session_status() === PHP_SESSION_NONE) {
+   session_start();
+}
+
+
 /**
-* Class: mailMgr
-*
-* Class to manage email communication.
-* This class used PHPMailer third-party utility class (class.phpmailer.php)
-*
-*/
+ * Class: mailMgr
+ *
+ * Class to manage email communication.
+ * This class used PHPMailer third-party utility class (class.phpmailer.php)
+ *
+ */
 
-    if(!isset($_SESSION[SMAPP_BASE_DIR])) {
-		echo $app_strings['ERRMSG_INVALIDSESSION'];
-		exit();
-	 }
-    require_once($_SESSION[SMAPP_BASE_DIR]."/app/boot/checksandincludes.php");
-    require_once($_SESSION[SMAPP_BASE_DIR]."/app/views/includes/include_directory_paths.php");
-    
-    // require_once($_SESSION[SMAPP_BASE_DIR]."/modules/communication/class.phpmailer.php");
+if (!isset($_SESSION['EMRP_BASE_DIR'])) {
+   echo $app_strings['ERRMSG_INVALIDSESSION'];
+   exit();
+}
+require_once($_SESSION['EMRP_BASE_DIR'] . "/app/boot/checksandincludes.php");
+require_once($_SESSION['EMRP_BASE_DIR'] . "/app/views/includes/include_directory_paths.php");
 
-    class mailMgr {
-    
-      private $PHPMailer;
-      
-      function __construct() {
-      
-         $this->PHPMailer = new PHPMailer(true);   // false - dont throw any external exceptions (false option not working)
-         
-         $this->PHPMailer->Host     = $cfg_mail_Host;
-         $this->PHPMailer->Mailer   = $cfg_mail_Mailer;    // Method to send mail. Allowed values are "mail", "sendmail", or "smtp"
-         $this->PHPMailer->Username = $cfg_smtp_username;  // SMTP Server Username
-         $this->PHPMailer->Password = $cfg_smtp_password;  // SMTP Server password
-         
-         if($cfg_smtp_Sender != '') {
-           $this->PHPMailer->Sender = $cfg_smtp_Sender;
-         }
-         
-         if($cfg_htmlformat) {    // true to send the emails in HTML format
-             $this->PHPMailer->IsHTML(true);
-         }
-         
-         if($cfg_sendmail_path != '') {
-             $this->PHPMailer->Sendmail =  $cfg_sendmail_path;
-         }
-      }
-      
-      function setFromAddress($fromAddr, $fromName="") {
-      
-         $this->PHPMailer->setFrom($fromAddr, $fromName);
-      }
-      
-      function setToAddress($address) {
-      
-         $this->PHPMailer->AddAddress($address);
-      }
-      
-      function setCCAddress($address) {
+// require_once($_SESSION[SMAPP_BASE_DIR]."/modules/communication/class.phpmailer.php");
 
-            $this->PHPMailer->AddCC($address);
+class mailMgr
+{
+
+   private $PHPMailer;
+
+   function __construct()
+   {
+
+      global $cfg_mail_Host;
+      // global $cfg_mail_Mailer;
+      global $cfg_smtp_username;
+      global $cfg_smtp_password;
+      global $cfg_smtp_Sender;
+      global $cfg_htmlformat;
+      global $cfg_sendmail_path;
+
+      $this->PHPMailer = new PHPMailer(true);   // false - dont throw any external exceptions (false option not working)
+
+      $this->PHPMailer->isSMTP();
+
+      $this->PHPMailer->Host     = $cfg_mail_Host;
+      //$this->PHPMailer->Mailer   = $cfg_mail_Mailer;    // Method to send mail. Allowed values are "mail", "sendmail", or "smtp"
+      $this->PHPMailer->SMTPAuth   = true;
+      $this->PHPMailer->Username = $cfg_smtp_username;  // SMTP Server Username
+      $this->PHPMailer->Password = $cfg_smtp_password;  // SMTP Server password
+
+      $this->PHPMailer->SMTPSecure = 'tls';
+      $this->PHPMailer->Port       = 587;
+
+      $this->PHPMailer->CharSet = 'UTF-8';
+
+      // $this->PHPMailer->SMTPDebug = 2;
+      // $this->PHPMailer->Debugoutput = 'error_log';
+
+
+      if ($cfg_smtp_Sender != '') {
+         $this->PHPMailer->Sender = $cfg_smtp_Sender;
       }
 
-      function setBCCAddress($address) {
+      if ($cfg_htmlformat) {    // true to send the emails in HTML format
+         $this->PHPMailer->IsHTML(true);
+      }
 
-          $this->PHPMailer->AddBCC($address);
-      }
-      
-      function setReplyTo($address) {
-      
-         $this->PHPMailer->AddReplyTo($address);
-      }
-      
-      function setSubject($subject) {
-      
-         $this->PHPMailer->Subject = $subject;
-      }
-      
+      // if ($cfg_sendmail_path != '') {
+      //    $this->PHPMailer->Sendmail =  $cfg_sendmail_path;
+      // }
+   }
 
-      function setBody($msgbody) {
-      
-         if($cfg_htmlformat) {
-            $this->PHPMailer->MsgHTML($msgbody);
-         }
-         else {
-            $this->PHPMailer->Body = $msgbody;
-            $this->PHPMailer->AltBody = $msgbody; // for non-HTML clients
-         }
-      }
-      
-      function addAttachment($filename) {
-      
-         $this->PHPMailer->addAttachment($filename);
-      }
-      
-      function AddStringAttachment($string, $filename, $encoding = 'base64', $type = 'application/octet-stream') {
+   function setFromAddress($fromAddr, $fromName = "")
+   {
 
-         $this->PHPMailer->AddStringAttachment($string, $filename, $encoding, $type);
+      $this->PHPMailer->setFrom($fromAddr, $fromName);
+   }
+
+   function setToAddress($address)
+   {
+
+      $this->PHPMailer->AddAddress($address);
+   }
+
+   function setCCAddress($address)
+   {
+
+      $this->PHPMailer->AddCC($address);
+   }
+
+   function setBCCAddress($address)
+   {
+
+      $this->PHPMailer->AddBCC($address);
+   }
+
+   function setReplyTo($address)
+   {
+
+      $this->PHPMailer->AddReplyTo($address);
+   }
+
+   function setSubject($subject)
+   {
+
+      $this->PHPMailer->Subject = $subject;
+   }
+
+
+   function setBody($msgbody)
+   {
+      global $cfg_htmlformat;
+
+      if ($cfg_htmlformat) {
+         $this->PHPMailer->MsgHTML($msgbody);
+      } else {
+         $this->PHPMailer->Body = $msgbody;
+         $this->PHPMailer->AltBody = $msgbody; // for non-HTML clients
       }
-      
-      function sendEmail() {
-      
-         try {
-           $rtn = $this->PHPMailer->Send();
-           return $rtn;  // 'true' if success. 'false' if failed
-         }
-         catch(Exception $e) {
-           return false;
-         }
+   }
+
+
+   function addAttachment($filename)
+   {
+
+      $this->PHPMailer->addAttachment($filename);
+   }
+
+   function AddStringAttachment($string, $filename, $encoding = 'base64', $type = 'application/octet-stream')
+   {
+
+      $this->PHPMailer->AddStringAttachment($string, $filename, $encoding, $type);
+   }
+
+   // function sendEmail()
+   // {
+
+   //    try {
+   //       $rtn = $this->PHPMailer->Send();
+   //       return $rtn;  // 'true' if success. 'false' if failed
+   //    } catch (Exception $e) {
+   //       return false;
+   //    }
+   // }
+
+   function sendEmail()
+   {
+      try {
+         $rtn = $this->PHPMailer->send();
+         $this->PHPMailer->clearAddresses();
+         return $rtn;
+      } catch (Exception $e) {
+         error_log("SMTP Error: " . $this->PHPMailer->ErrorInfo);
+         return false;
       }
-  }
-?>
+   }
+}

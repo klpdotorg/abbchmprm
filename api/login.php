@@ -63,7 +63,9 @@
 	   }
 	   else {
 
-	       $access_token = createAccessToken();	
+	       updateLastLogin($childid);
+
+	       $access_token = createAccessToken();
 	    
 	       //Check if access token exists for this child and device
 	    

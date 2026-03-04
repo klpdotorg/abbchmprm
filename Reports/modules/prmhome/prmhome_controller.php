@@ -25,7 +25,8 @@
     $args['user_name'] = $arrUserName[0]['firstname']." ".$arrUserName[0]['lastname'];
     $_SESSION['user_name'] = $args['user_name'];
     */
-    if($_REQUEST['menu_top_activeitem']){
+    // if($_REQUEST['menu_top_activeitem']){
+    if (isset($_REQUEST['menu_top_activeitem'])) {
         $_SESSION['menu_top_activeitem'] = $_REQUEST['menu_top_activeitem'];
         $args['menu_top_activeitem'] = $_REQUEST['menu_top_activeitem'];
     }

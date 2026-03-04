@@ -7,7 +7,7 @@ session_start();
 
 $appconfigfile = dirname(__FILE__)."/config/appconfig.php";
 
-$querystr = $_SERVER[QUERY_STRING];
+$querystr = $_SERVER['QUERY_STRING'];
 if($querystr != '') {
 	$option = $_REQUEST['option'];  // eg. http://url?option=login
 }
@@ -17,7 +17,11 @@ $_SESSION['EMRP_CONFIG_FILE'] = $appconfigfile;
 $appbasedir = dirname(__FILE__);
 $_SESSION['EMRP_BASE_DIR'] = $appbasedir;
 
-$option = $_REQUEST['option'];
+if (!defined('EMRP_BASE_DIR')) {
+    define('EMRP_BASE_DIR', $appbasedir);
+}
+
+// $option = $_REQUEST['option'];
 
 if($option == '')
     $option = 'login';
@@ -81,7 +85,7 @@ switch($option) {
 		
 	     $app_helper = new app_helper();	
 	     // $_SESSION['userrole_code'] = $app_helper->getUserRoleCodeByUserId($_REQUEST['id']);
-	     header("Location: ".$_SESSION[EMRP_BASE_URL]."modules/home/home_controller.php?menu_left_activeitem=Home&taskname=show_homepage");
+	     header("Location: ".$_SESSION['EMRP_BASE_URL']."modules/home/home_controller.php?menu_left_activeitem=Home&taskname=show_homepage");
          exit();
      	 break;
 		

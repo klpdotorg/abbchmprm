@@ -1,5 +1,8 @@
 <?php
-    session_start();
+    // session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
     
   class app_user_dao {
         

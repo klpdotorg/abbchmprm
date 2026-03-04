@@ -7,7 +7,7 @@
    // they are used. All the directories in the include path will be searched.
    // this avoids the need to call require or include for all classes used in each of the php files
 	
-   function __autoload($classname) {
+   spl_autoload_register(function ($classname) {
 	
       global $cfg_autoload_includepath_rootdirectory;
 
@@ -29,5 +29,5 @@
     
       require_once($classname.".php"); // include the php file for the class (from any of the directories in the include path)
                                        // NOTE: The Class name and the PHP file in which the class is defined should be identical.
-	}
+	});
 ?>
