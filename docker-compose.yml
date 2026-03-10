@@ -45,23 +45,16 @@ services:
     depends_on:
       - db
 
-  # cron:
-  #   image: php:7.4-apache
-  #   container_name: php_cron
-  #   volumes:
-  #     - .:/var/www/html
-  #   depends_on:
-  #     - db
-  #   command: >
-  #     bash -c "
-  #     docker-php-ext-install mysqli pdo pdo_mysql &&
-  #     apt-get update &&
-  #     apt-get install -y cron &&
-  #     crontab -l | { cat; echo '*/5 * * * * php /var/www/html/cron/push_notification_cron.php >> /var/www/html/cron/push_cron.log 2>&1'; } | crontab - &&
-  #     service cron start &&
-  #     tail -f /var/www/html/cron/push_cron.log
-  #     "
-  #   restart: always
+  cron:
+    build:
+      context: .
+      dockerfile: cron/Dockerfile
+    container_name: php_cron
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    restart: always
 
 volumes:
   db_data:

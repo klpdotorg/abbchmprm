@@ -3,123 +3,45 @@
 /**
  * Push Notification Translations
  *
- * Language IDs match the language_tbl:
- *   1 = Kannada, 2 = Hindi,    3 = English, 4 = Odiya,
- *   5 = Gujarati, 6 = Marathi, 7 = Telugu,  8 = Tamil, 9 = Urdu
+ * Messages are stored in push_notification_messages_tbl:
+ *   notification_type | id_language | title | body
  *
- * Structure: $NOTIFICATION_TRANSLATIONS[$type][$id_language] = ['title' => ..., 'body' => ...]
- * Fallback:  id_language = 3 (English) is used if translation not found
+ * To update a message: edit the row directly in the DB via phpMyAdmin.
+ * To add a new language: INSERT a new row with the new id_language.
+ * Fallback: English (id_language = 3) is used if translation not found.
  */
-
-$NOTIFICATION_TRANSLATIONS = array(
-
-    // ----------------------------------------------------------------
-    // inactive_3days (last login 3-6 days ago — gentle nudge)
-    // ----------------------------------------------------------------
-    'inactive_3days' => array(
-        1 => array('title' => 'ನಿಮ್ಮನ್ನು ಮಿಸ್ ಮಾಡ್ತಿದ್ದೇವೆ!',       'body' => '3 ದಿನಗಳಿಂದ ನಿಮ್ಮನ್ನು ನೋಡಿಲ್ಲ! ಹಿಂದಿರುಗಿ ಬನ್ನಿ ಮತ್ತು ಗಣಿತ ಅಭ್ಯಾಸ ಮಾಡಿ.'),
-        2 => array('title' => 'आपको याद किया जा रहा है!',             'body' => '3 दिनों से आपको नहीं देखा! वापस आएं और गणित का अभ्यास करें।'),
-        3 => array('title' => 'We\'ve been missing you!',              'body' => 'It\'s been 3 days! Come back and keep your math skills sharp.'),
-        4 => array('title' => 'ଆପଣଙ୍କୁ ମିସ୍ କରୁଛୁ!',                'body' => '3 ଦିନ ହୋଇଗଲା! ଫେରି ଆସନ୍ତୁ ଏବଂ ଗଣିତ ଅଭ୍ୟାସ ଜାରି ରଖନ୍ତୁ।'),
-        5 => array('title' => 'તમારી રાહ જોઈ રહ્યા છીએ!',           'body' => '3 દિવસ થઈ ગયા! પાછા આવો અને ગણિત પ્રેક્ટિસ ચાલુ રાખો।'),
-        6 => array('title' => 'तुमची आठवण येत आहे!',                 'body' => '3 दिवस झाले! परत या आणि गणिताचा सराव सुरू ठेवा।'),
-        7 => array('title' => 'మీ కోసం ఎదురు చూస్తున్నాం!',          'body' => '3 రోజులైంది! తిరిగి రండి మరియు గణిత సాధన కొనసాగించండి.'),
-        8 => array('title' => 'உங்களை காத்திருக்கிறோம்!',            'body' => '3 நாட்கள் ஆகிவிட்டது! திரும்பி வாருங்கள் மற்றும் கணித பயிற்சி தொடருங்கள்.'),
-        9 => array('title' => 'آپ کی یاد آ رہی ہے!',                 'body' => '3 دن ہو گئے! واپس آئیں اور ریاضی کی مشق جاری رکھیں۔'),
-    ),
-
-    // ----------------------------------------------------------------
-    // inactive_7days (last login 7-13 days ago — stronger reminder)
-    // ----------------------------------------------------------------
-    'inactive_7days' => array(
-        1 => array('title' => 'ನಿಮ್ಮನ್ನು ನೋಡಾಲಾಗಲಿಲ್ಲ!',      'body' => 'ಒಂದು ವಾರ ಆಯಿತು! ಹಿಂದಿರುಗಿ ಬನ್ನಿ ಮತ್ತು ಗಣಿತ ಅಭ್ಯಾಸ ಮಾಡಿ - ನಿಮ್ಮ ಸ್ಟ್ರೀಕ್ ಕಾಯುತ್ತಿದೆ!'),
-        2 => array('title' => 'आपकी बहुत याद आ रही है!',        'body' => 'एक हफ्ता हो गया! वापस आएं और गणित का अभ्यास करें - आपकी स्ट्रीक इंतजार कर रही है!'),
-        3 => array('title' => 'We miss you!',                    'body' => 'A whole week! Come back and practice your math - your streak is waiting for you!'),
-        4 => array('title' => 'ଆମେ ଆପଣଙ୍କୁ ମିସ୍ କରୁଛୁ!',      'body' => 'ଏକ ସପ୍ତାହ ହୋଇଗଲା! ଫେରି ଆସନ୍ତୁ ଏବଂ ଗଣିତ ଅଭ୍ୟାସ କରନ୍ତୁ - ଆପଣଙ୍କ ସ୍ଟ୍ରୀକ୍ ଅପେକ୍ଷା କରୁଛି!'),
-        5 => array('title' => 'અમે તમને ખૂબ યાદ કરીએ છીએ!',    'body' => 'એક અઠવાડિયું થઈ ગયું! પાછા આવો અને ગણિત પ્રેક્ટિસ કરો - તમારી સ્ટ્રીક રાહ જુએ છે!'),
-        6 => array('title' => 'आम्ही तुम्हाला मिस करत आहोत!',  'body' => 'एक आठवडा झाला! परत या आणि गणिताचा सराव करा - तुमची स्ट्रीक वाट पाहत आहे!'),
-        7 => array('title' => 'మీరు మాకు గుర్తొచ్చారు!',       'body' => 'ఒక వారం అయింది! తిరిగి రండి మరియు గణిత సాధన చేయండి - మీ స్ట్రీక్ మీ కోసం వేచి ఉంది!'),
-        8 => array('title' => 'நாங்கள் உங்களை நினைக்கிறோம்!', 'body' => 'ஒரு வாரம் ஆகிவிட்டது! திரும்பி வாருங்கள் - உங்கள் ஸ்ட்ரீக் காத்திருக்கிறது!'),
-        9 => array('title' => 'ہم آپ کو بہت یاد کرتے ہیں!',   'body' => 'ایک ہفتہ ہو گیا! واپس آئیں اور ریاضی کی مشق کریں - آپ کی سٹریک آپ کا انتظار کر رہی ہے!'),
-    ),
-
-    // ----------------------------------------------------------------
-    // inactive_14days (last login 14+ days ago — urgent call to action)
-    // ----------------------------------------------------------------
-    'inactive_14days' => array(
-        1 => array('title' => 'ನಾವು ನಿಮ್ಮನ್ನು ಕಳೆದುಕೊಳ್ಳುತ್ತಿದ್ದೇವೆ!', 'body' => '2 ವಾರಗಳಿಂದ ನೀವು ಇಲ್ಲ! ಇಂದೇ ಹಿಂದಿರುಗಿ ಬನ್ನಿ - ನಿಮ್ಮ ಗಣಿತ ಕೌಶಲ್ಯ ನಿಮ್ಮ ಹಿಂದಿರಿಗಿ ಬಾ ಎಂದು ಕಾಯುತ್ತಿದೆ!'),
-        2 => array('title' => 'क्या आप हमें भूल गए?',                    'body' => '2 हफ्ते हो गए! आज ही वापस आएं - आपकी गणित की प्रतिभा आपका इंतजार कर रही है!'),
-        3 => array('title' => 'It\'s been 2 weeks!',                      'body' => 'We haven\'t seen you in 2 weeks. Come back today - your math talent is waiting to shine!'),
-        4 => array('title' => 'ଆପଣ ଆମକୁ ଭୁଲି ଯାଇଛନ୍ତି କି?',           'body' => '2 ସପ୍ତାହ ହୋଇଗଲା! ଆଜି ଫେରି ଆସନ୍ତୁ - ଆପଣଙ୍କ ଗଣିତ ପ୍ରତିଭା ଅପେକ୍ଷା କରୁଛି!'),
-        5 => array('title' => 'શું તમે અમને ભૂલી ગયા?',                 'body' => '2 અઠવાડિયા થઈ ગયા! આજે જ પાછા આવો - તમારી ગણિત પ્રતિભા રાહ જુએ છે!'),
-        6 => array('title' => 'तुम्ही आम्हाला विसरलात का?',              'body' => '2 आठवडे झाले! आजच परत या - तुमची गणित प्रतिभा वाट पाहत आहे!'),
-        7 => array('title' => 'మీరు మాకు మర్చిపోయారా?',                 'body' => '2 వారాలు అయింది! ఈ రోజే తిరిగి రండి - మీ గణిత నైపుణ్యం మీ కోసం వేచి ఉంది!'),
-        8 => array('title' => 'நீங்கள் எங்களை மறந்துவிட்டீர்களா?',    'body' => '2 வாரங்கள் ஆகிவிட்டது! இன்றே திரும்பி வாருங்கள் - உங்கள் கணித திறமை காத்திருக்கிறது!'),
-        9 => array('title' => 'کیا آپ نے ہمیں بھلا دیا؟',              'body' => '2 ہفتے ہو گئے! آج ہی واپس آئیں - آپ کی ریاضی کی صلاحیت آپ کا انتظار کر رہی ہے!'),
-    ),
-
-    // ----------------------------------------------------------------
-    // mid_game_3days
-    // ----------------------------------------------------------------
-    'mid_game_3days' => array(
-        1 => array('title' => 'ಆಟ ಅರ್ಧದಲ್ಲಿ ಬಿಟ್ಟಿರಿ!',        'body' => 'ಹಿಂದಿರುಗಿ ಅಲ್ಲಿಂದ ಮುಂದುವರಿಸಿ. ನಿಮ್ಮ ಪ್ರಗತಿ ಸಂರಕ್ಷಿಸಲಾಗಿದೆ!'),
-        2 => array('title' => 'खेल बीच में छोड़ा!',              'body' => 'वापस आएं और जहां छोड़ा था वहां से शुरू करें। आपकी प्रगति सुरक्षित है!'),
-        3 => array('title' => 'You left mid-game!',               'body' => 'Come back and finish where you left off. Your progress is saved!'),
-        4 => array('title' => 'ଆପଣ ଖେଳ ମଝିରେ ଛାଡ଼ିଲେ!',        'body' => 'ଫେରି ଆସନ୍ତୁ ଏବଂ ଯେଠୁ ଛାଡ଼ିଥିଲେ ସେଠୁ ଶେଷ କରନ୍ତୁ। ଆପଣଙ୍କ ପ୍ରଗତି ସୁରକ୍ଷିତ!'),
-        5 => array('title' => 'તમે રમત અધૂરી છોડી!',            'body' => 'પાછા આવો અને જ્યાંથી છોડ્યું ત્યાંથી પૂર્ણ કરો. તમારી પ્રગતિ સચવાઈ છે!'),
-        6 => array('title' => 'खेळ अर्धवट सोडला!',              'body' => 'परत या आणि जिथे सोडले होते तिथून पूर्ण करा. तुमची प्रगती जपली आहे!'),
-        7 => array('title' => 'మీరు ఆట మధ్యలో వదిలారు!',        'body' => 'తిరిగి రండి మరియు మీరు వదిలిన చోటి నుండి పూర్తి చేయండి. మీ పురోగతి సేవ్ అయింది!'),
-        8 => array('title' => 'நீங்கள் நடுவில் விட்டீர்கள்!',  'body' => 'திரும்பி வாருங்கள் விட்ட இடத்திலிருந்து தொடருங்கள். உங்கள் முன்னேற்றம் சேமிக்கப்பட்டது!'),
-        9 => array('title' => 'آپ نے کھیل ادھورا چھوڑا!',      'body' => 'واپس آئیں اور جہاں سے چھوڑا تھا وہاں سے مکمل کریں۔ آپ کی پیشرفت محفوظ ہے!'),
-    ),
-
-    // ----------------------------------------------------------------
-    // reward_5games
-    // ----------------------------------------------------------------
-    'reward_5games' => array(
-        1 => array('title' => 'ನೀವು ಗಣಿತ ತಾರೆ!',                   'body' => 'ಅದ್ಭುತ! ನೀವು 5 ಆಟಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ. ಮುಂದುವರಿಸಿ - ಬಹುಮಾನಗಳು ನಿಮ್ಮನ್ನು ಕಾಯುತ್ತಿವೆ!'),
-        2 => array('title' => 'आप गणित स्टार हैं!',                  'body' => 'शाबाश! आपने 5 गेम पूरे किए। आगे बढ़ते रहें - पुरस्कार आपका इंतजार कर रहे हैं!'),
-        3 => array('title' => 'You are a Math Star!',                  'body' => 'Amazing! You have completed 5 games. Keep it up - rewards await you!'),
-        4 => array('title' => 'ଆପଣ ଗଣିତ ତାରା!',                     'body' => 'ବାh! ଆପଣ 5ଟି ଖେଳ ସମ୍ପୂର୍ଣ୍ଣ କଲେ। ଚାলୁ ରଖନ୍ତୁ - ପୁରସ୍କାର ଅପେକ୍ଷା କରୁଛି!'),
-        5 => array('title' => 'તમે ગણિત સ્ટાર છો!',                  'body' => 'અદ્ભુત! 5 ગેમ્સ પૂર્ણ કર્યા. ચાલુ રાખો - ઇનામ તમારી રાહ જુએ છે!'),
-        6 => array('title' => 'तुम्ही गणित स्टार आहात!',             'body' => 'शाब्बास! तुम्ही 5 गेम पूर्ण केले. असेच सुरू ठेवा - बक्षिसे वाट पाहत आहेत!'),
-        7 => array('title' => 'మీరు గణిత నక్షత్రం!',                  'body' => 'అద్భుతం! మీరు 5 గేమ్‌లు పూర్తి చేసారు. కొనసాగించండి - బహుమతులు మీ కోసం వేచి ఉన్నాయి!'),
-        8 => array('title' => 'நீங்கள் கணித நட்சத்திரம்!',          'body' => 'அருமை! நீங்கள் 5 விளையாட்டுகளை முடித்தீர்கள். தொடருங்கள் - பரிசுகள் உங்களுக்காக காத்திருக்கின்றன!'),
-        9 => array('title' => 'آپ ریاضی کے ستارے ہیں!',             'body' => 'شاباش! آپ نے 5 گیمز مکمل کیے۔ جاری رکھیں - انعامات آپ کا انتظار کر رہے ہیں!'),
-    ),
-
-    // ----------------------------------------------------------------
-    // daily_reminder
-    // ----------------------------------------------------------------
-    'daily_reminder' => array(
-        1 => array('title' => 'ದಿನದ ಗಣಿತ ಸವಾಲು!',                   'body' => 'ನಿಮ್ಮ ದಿನದ ಅಭ್ಯಾಸ ಮಾಡಿ. ಕೆಲವು ನಿಮಿಷಗಳ ಗಣಿತ ನಿಮ್ಮ ಕೌಶಲ್ಯ ಹೆಚ್ಚಿಸುತ್ತದೆ!'),
-        2 => array('title' => 'दैनिक गणित चुनौती!',                  'body' => 'अपनी रोज़ाना की प्रैक्टिस का समय है। कुछ मिनट गणित आपके कौशल को तेज़ रखेगा!'),
-        3 => array('title' => 'Daily Math Challenge!',                  'body' => 'Time for your daily practice. A few minutes of math a day keeps your skills sharp!'),
-        4 => array('title' => 'ଦୈନିକ ଗଣିତ ଚ୍ୟାଲେଞ୍ଜ!',               'body' => 'ଆପଣଙ୍କ ଦୈନିକ ଅଭ୍ୟାସ ସମୟ। ଗଣିତ ଅଭ୍ୟାସ ଜାରି ରଖନ୍ତୁ!'),
-        5 => array('title' => 'દૈનિક ગણિત પડકાર!',                   'body' => 'તમારી રોજિંદી પ્રેક્ટિસ નો સમય. થોડી મિનિટ ગણિત તમારી કુશળતા વધારશે!'),
-        6 => array('title' => 'दैनंदिन गणित आव्हान!',                 'body' => 'तुमच्या दैनंदिन सरावाची वेळ आहे. दररोज काही मिनिटे गणित केल्याने तुमचे कौशल्य सुधारेल!'),
-        7 => array('title' => 'రోజువారీ గణిత సవాల్!',                 'body' => 'మీ రోజువారీ సాధన సమయం. కొన్ని నిమిషాల గణితం మీ నైపుణ్యాలను పదును పెడతాయి!'),
-        8 => array('title' => 'தினசரி கணித சவால்!',                   'body' => 'உங்கள் தினசரி பயிற்சியின் நேரம். சில நிமிட கணிதம் உங்கள் திறமையை கூர்தீட்டும்!'),
-        9 => array('title' => 'روزانہ ریاضی چیلنج!',                  'body' => 'اپنی روزانہ کی مشق کا وقت ہے۔ چند منٹ کی ریاضی آپ کی مہارت کو تیز رکھے گی!'),
-    ),
-);
 
 /**
  * Get the translated title and body for a notification type and language.
- * Falls back to English (id_language = 3) if translation not found.
+ * Fetches from push_notification_messages_tbl.
+ * Falls back to English (id_language = 3) if no translation found.
  *
- * @param string $type          - notification type key (e.g. 'inactive_7days')
- * @param int    $id_language   - language ID from child_tbl
+ * @param string $type        - notification type key (e.g. 'inactive_3days')
+ * @param int    $id_language - language ID from child_tbl
  * @return array ['title' => string, 'body' => string]
  */
 function getNotificationText($type, $id_language) {
-    global $NOTIFICATION_TRANSLATIONS;
-    $lang = intval($id_language);
 
-    if (isset($NOTIFICATION_TRANSLATIONS[$type][$lang])) {
-        return $NOTIFICATION_TRANSLATIONS[$type][$lang];
+    $dbh  = services_dbhandler::getInstance();
+    $lang = intval($id_language);
+    $type = $dbh->getSanitizedData($type);
+
+    // Try the child's language first, then fall back to English (3)
+    $query = "SELECT title, body
+              FROM push_notification_messages_tbl
+              WHERE notification_type = '$type'
+                AND id_language IN ($lang, 3)
+              ORDER BY CASE id_language WHEN $lang THEN 0 ELSE 1 END
+              LIMIT 1";
+
+    $dbh->executeQuery($query);
+    $rows = $dbh->fetchAssocList();
+
+    if (!empty($rows)) {
+        return array('title' => $rows[0]['title'], 'body' => $rows[0]['body']);
     }
-    // Fallback to English
-    return $NOTIFICATION_TRANSLATIONS[$type][3];
+
+    // Hard fallback if DB has no entry at all
+    return array('title' => 'Practice Math Today!', 'body' => 'Open the app and play a game!');
 }
 ?>

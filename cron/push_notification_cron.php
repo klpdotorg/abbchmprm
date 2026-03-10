@@ -40,9 +40,20 @@ $logmgr = new exceptionMgr(" ");
 $now = date('Y-m-d H:i:s');
 $logmgr->logInfo("push_notification_cron: Started at $now");
 
+// Unique ID to group all sends from this single cron execution
+$cron_run_id = sprintf(
+    '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+    mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+    mt_rand(0, 0xffff),
+    mt_rand(0, 0x0fff) | 0x4000,
+    mt_rand(0, 0x3fff) | 0x8000,
+    mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+);
+
 // ----------------------------------------------------------------
-// Helper: check if a notification was already sent to this child
-//         within the given interval (to prevent duplicate sends)
+// Helper: check if a notification was already *successfully* sent
+//         to this child within the given interval (prevents duplicates;
+//         failed sends do not count so they can be retried)
 // ----------------------------------------------------------------
 function alreadySent($dbh, $childid, $type, $interval_hours) {
 
@@ -50,6 +61,7 @@ function alreadySent($dbh, $childid, $type, $interval_hours) {
               FROM push_notification_log_tbl
               WHERE id_child          = " . intval($childid) . "
                 AND notification_type = '" . $type . "'
+                AND delivery_status   = 'sent'
                 AND sent_datetime     > DATE_SUB(NOW(), INTERVAL " . intval($interval_hours) . " HOUR)";
 
     $dbh->executeQuery($query);
@@ -58,29 +70,41 @@ function alreadySent($dbh, $childid, $type, $interval_hours) {
 }
 
 // ----------------------------------------------------------------
-// Helper: log a sent notification
+// Helper: log a notification attempt (success or failure)
 // ----------------------------------------------------------------
-function logNotification($dbh, $childid, $type) {
+function logNotification($dbh, $childid, $type, $status, $fcm_message_id, $error_message, $fcm_token_used, $id_language, $cron_run_id) {
 
-    $query = "INSERT INTO push_notification_log_tbl (id_child, notification_type, sent_datetime)
-              VALUES (" . intval($childid) . ", '" . $type . "', NOW())";
+    $fcm_message_id_sql = $fcm_message_id  ? "'" . addslashes($fcm_message_id)  . "'" : "NULL";
+    $error_message_sql  = $error_message   ? "'" . addslashes($error_message)   . "'" : "NULL";
+    $fcm_token_sql      = $fcm_token_used  ? "'" . addslashes($fcm_token_used)  . "'" : "NULL";
+
+    $query = "INSERT INTO push_notification_log_tbl
+                  (id_child, notification_type, sent_datetime, delivery_status,
+                   fcm_message_id, error_message, fcm_token_used, id_language, cron_run_id)
+              VALUES
+                  (" . intval($childid) . ", '" . $type . "', NOW(), '" . $status . "',
+                   $fcm_message_id_sql, $error_message_sql, $fcm_token_sql,
+                   " . intval($id_language) . ", '" . addslashes($cron_run_id) . "')";
+
     $dbh->executeQuery($query);
 }
 
 // ----------------------------------------------------------------
 // Helper: send and log one notification (uses child's language)
 // ----------------------------------------------------------------
-function sendAndLog($fcm, $dbh, $logmgr, $row, $type) {
+function sendAndLog($fcm, $dbh, $logmgr, $row, $type, $cron_run_id) {
 
     $id_language = isset($row['id_language']) ? intval($row['id_language']) : 3;
     $text        = getNotificationText($type, $id_language);
 
-    $result = $fcm->sendPushNotification($row['fcm_token'], $text['title'], $text['body']);
+    $result = $fcm->sendPushNotification($row['fcm_token'], $text['title'], $text['body'], ['notification_type' => $type]);
 
     if ($result['success']) {
-        logNotification($dbh, $row['id_child'], $type);
-        $logmgr->logInfo("push_notification_cron [$type]: Sent to child " . $row['id_child'] . " (" . $row['child_name'] . ") lang=$id_language");
+        $fcm_message_id = isset($result['response']['name']) ? $result['response']['name'] : null;
+        logNotification($dbh, $row['id_child'], $type, 'sent', $fcm_message_id, null, $row['fcm_token'], $id_language, $cron_run_id);
+        $logmgr->logInfo("push_notification_cron [$type]: Sent to child " . $row['id_child'] . " (" . $row['child_name'] . ") lang=$id_language msg=$fcm_message_id");
     } else {
+        logNotification($dbh, $row['id_child'], $type, 'failed', null, $result['error'], $row['fcm_token'], $id_language, $cron_run_id);
         $logmgr->logInfo("push_notification_cron [$type]: FAILED for child " . $row['id_child'] . " - " . $result['error']);
     }
 }
@@ -102,7 +126,7 @@ $inactive_3_children = $dbh->fetchAssocList();
 if ($inactive_3_children) {
     foreach ($inactive_3_children as $row) {
         if (!alreadySent($dbh, $row['id_child'], 'inactive_3days', 72)) { // 72h = 3 days
-            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_3days');
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_3days', $cron_run_id);
         }
     }
 }
@@ -124,7 +148,7 @@ $inactive_7_children = $dbh->fetchAssocList();
 if ($inactive_7_children) {
     foreach ($inactive_7_children as $row) {
         if (!alreadySent($dbh, $row['id_child'], 'inactive_7days', 168)) { // 168h = 7 days
-            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_7days');
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_7days', $cron_run_id);
         }
     }
 }
@@ -145,7 +169,7 @@ $inactive_14_children = $dbh->fetchAssocList();
 if ($inactive_14_children) {
     foreach ($inactive_14_children as $row) {
         if (!alreadySent($dbh, $row['id_child'], 'inactive_14days', 336)) { // 336h = 14 days
-            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_14days');
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_14days', $cron_run_id);
         }
     }
 }
@@ -174,7 +198,7 @@ $midgame_children = $dbh->fetchAssocList();
 if ($midgame_children) {
     foreach ($midgame_children as $row) {
         if (!alreadySent($dbh, $row['id_child'], 'mid_game_3days', 24)) {
-            sendAndLog($fcm, $dbh, $logmgr, $row, 'mid_game_3days');
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'mid_game_3days', $cron_run_id);
         }
     }
 }
@@ -205,7 +229,7 @@ $reward_children = $dbh->fetchAssocList();
 
 if ($reward_children) {
     foreach ($reward_children as $row) {
-        sendAndLog($fcm, $dbh, $logmgr, $row, 'reward_5games');
+        sendAndLog($fcm, $dbh, $logmgr, $row, 'reward_5games', $cron_run_id);
     }
 }
 
@@ -235,7 +259,7 @@ $daily_children = $dbh->fetchAssocList();
 if ($daily_children) {
     foreach ($daily_children as $row) {
         if (!alreadySent($dbh, $row['id_child'], 'daily_reminder', 24)) {
-            sendAndLog($fcm, $dbh, $logmgr, $row, 'daily_reminder');
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'daily_reminder', $cron_run_id);
         }
     }
 }

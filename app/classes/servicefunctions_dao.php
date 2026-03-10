@@ -491,5 +491,20 @@ class servicefunctions_dao {
         return $this->dbh->updateRecords('child_tbl', $data, $where_condition);
     }
 
+    function markNotificationOpened($childid, $notification_type) {
+
+        $query = "UPDATE push_notification_log_tbl
+                  SET is_opened      = 1,
+                      opened_datetime = NOW()
+                  WHERE id_child          = " . intval($childid) . "
+                    AND notification_type = '" . addslashes($notification_type) . "'
+                    AND delivery_status   = 'sent'
+                    AND is_opened         = 0
+                  ORDER BY sent_datetime DESC
+                  LIMIT 1";
+
+        return $this->dbh->executeQuery($query);
+    }
+
 }  // end of the Class
 ?>

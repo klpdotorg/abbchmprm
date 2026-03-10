@@ -69,7 +69,7 @@ class auth_helper
 
     $password_stored = $this->app_user_dao->getPasswordByUserId($user_id);
     $password_valid = $this->auth_passwordmgr->checkMatch($password_input, $password_stored);
-    //   echo crypt("ABC");
+    // echo crypt("ABC");
     if (!$password_valid) {
       return false; // authentication failed
     }

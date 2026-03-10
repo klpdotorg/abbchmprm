@@ -410,4 +410,10 @@ function updateLastLogin($childid) {
     return $servicefunctions_dao->updateLastLogin($childid);
 }
 
+function markNotificationOpened($childid, $notification_type) {
+
+    $servicefunctions_dao = new servicefunctions_dao();
+    return $servicefunctions_dao->markNotificationOpened($childid, $notification_type);
+}
+
 ?>
