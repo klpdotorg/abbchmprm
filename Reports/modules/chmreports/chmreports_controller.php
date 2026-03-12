@@ -34,7 +34,7 @@ switch ($taskname) {
 
     case 'show_reports_reportshome':
 
-        $args['view_name'] = "chmshow_reports_view_reportshome_beautiful";
+        $args['view_name'] = "chmshow_reports_view_reportshome";
         $args['arrAllReports'] = $reports_helper->getAllReports();
         //print_r($args['arrAllReports']);
         $errmsg = array();

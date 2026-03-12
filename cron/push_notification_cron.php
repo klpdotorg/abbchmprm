@@ -8,9 +8,12 @@
  *   0 9 * * * php /var/www/html/cron/push_notification_cron.php >> /var/log/push_cron.log 2>&1
  *
  * Rules:
- *   1a. inactive_3days  - Child has not logged in for 3-6 days
- *   1b. inactive_7days  - Child has not logged in for 7-13 days
- *   1c. inactive_14days - Child has not logged in for 14+ days
+ *   1a. inactive_3days   - Child has not logged in for 3-6 days
+ *   1b. inactive_7days   - Child has not logged in for 7-13 days
+ *   1c. inactive_14days  - Child has not logged in for 14-29 days
+ *   1d. inactive_1month  - Child has not logged in for 30-59 days
+ *   1e. inactive_2months - Child has not logged in for 60-89 days
+ *   1f. inactive_3months - Child has not logged in for 90+ days
  *   2.  mid_game_3days  - Child played a game 1-3 days ago but not since (left mid-game)
  *   3.  reward_5games   - Child just crossed 5 total games completed (one-time reward)
  *   4.  daily_reminder  - Child has not played any game in the last 24 hours
@@ -154,14 +157,15 @@ if ($inactive_7_children) {
 }
 
 // ================================================================
-// RULE 1c: 14 days inactive (last login 14+ days ago)
+// RULE 1c: 14 days inactive (last login 14-29 days ago)
 // Throttle: don't re-send within 14 days
 // ================================================================
 $query_inactive_14 = "SELECT id_child, child_name, fcm_token, id_language
                       FROM child_tbl
                       WHERE fcm_token  IS NOT NULL
                         AND last_login IS NOT NULL
-                        AND last_login < DATE_SUB(NOW(), INTERVAL 14 DAY)";
+                        AND last_login < DATE_SUB(NOW(), INTERVAL 14 DAY)
+                        AND last_login >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
 
 $dbh->executeQuery($query_inactive_14);
 $inactive_14_children = $dbh->fetchAssocList();
@@ -170,6 +174,71 @@ if ($inactive_14_children) {
     foreach ($inactive_14_children as $row) {
         if (!alreadySent($dbh, $row['id_child'], 'inactive_14days', 336)) { // 336h = 14 days
             sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_14days', $cron_run_id);
+        }
+    }
+}
+
+// ================================================================
+// RULE 1d: 1 month inactive (last login 30-59 days ago)
+// Throttle: don't re-send within 30 days
+// ================================================================
+$query_inactive_1m = "SELECT id_child, child_name, fcm_token, id_language
+                      FROM child_tbl
+                      WHERE fcm_token  IS NOT NULL
+                        AND last_login IS NOT NULL
+                        AND last_login < DATE_SUB(NOW(), INTERVAL 30 DAY)
+                        AND last_login >= DATE_SUB(NOW(), INTERVAL 60 DAY)";
+
+$dbh->executeQuery($query_inactive_1m);
+$inactive_1m_children = $dbh->fetchAssocList();
+
+if ($inactive_1m_children) {
+    foreach ($inactive_1m_children as $row) {
+        if (!alreadySent($dbh, $row['id_child'], 'inactive_1month', 720)) { // 720h = 30 days
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_1month', $cron_run_id);
+        }
+    }
+}
+
+// ================================================================
+// RULE 1e: 2 months inactive (last login 60-89 days ago)
+// Throttle: don't re-send within 30 days
+// ================================================================
+$query_inactive_2m = "SELECT id_child, child_name, fcm_token, id_language
+                      FROM child_tbl
+                      WHERE fcm_token  IS NOT NULL
+                        AND last_login IS NOT NULL
+                        AND last_login < DATE_SUB(NOW(), INTERVAL 60 DAY)
+                        AND last_login >= DATE_SUB(NOW(), INTERVAL 90 DAY)";
+
+$dbh->executeQuery($query_inactive_2m);
+$inactive_2m_children = $dbh->fetchAssocList();
+
+if ($inactive_2m_children) {
+    foreach ($inactive_2m_children as $row) {
+        if (!alreadySent($dbh, $row['id_child'], 'inactive_2months', 720)) { // 720h = 30 days
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_2months', $cron_run_id);
+        }
+    }
+}
+
+// ================================================================
+// RULE 1f: 3 months inactive (last login 90+ days ago)
+// Throttle: don't re-send within 30 days
+// ================================================================
+$query_inactive_3m = "SELECT id_child, child_name, fcm_token, id_language
+                      FROM child_tbl
+                      WHERE fcm_token  IS NOT NULL
+                        AND last_login IS NOT NULL
+                        AND last_login < DATE_SUB(NOW(), INTERVAL 90 DAY)";
+
+$dbh->executeQuery($query_inactive_3m);
+$inactive_3m_children = $dbh->fetchAssocList();
+
+if ($inactive_3m_children) {
+    foreach ($inactive_3m_children as $row) {
+        if (!alreadySent($dbh, $row['id_child'], 'inactive_3months', 720)) { // 720h = 30 days
+            sendAndLog($fcm, $dbh, $logmgr, $row, 'inactive_3months', $cron_run_id);
         }
     }
 }
