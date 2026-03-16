@@ -1,0 +1,12 @@
+<?php
+
+// Copy this file to dbconfig.php and fill in your actual credentials.
+// Never commit dbconfig.php to version control.
+
+$cfg_dbhost = 'db';           // Docker service name, or 'localhost' for local
+$cfg_dbuser = 'root';
+$cfg_dbpassword = 'YOUR_DB_PASSWORD';
+$cfg_database = 'abbchmprmdb';
+$cfg_port = '3306';
+
+?>

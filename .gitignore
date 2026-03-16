@@ -1,35 +1,48 @@
-#
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-#  KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-
-
-assets/bb5_0_5
-assets/userprogress/logfiles/abslog.log6
-logfiles/abslog.log6
-logfiles/*.log
-Reports/logfiles/*.log
-
-# Firebase
-*.json
-cron/*.json
-
-# DB configs
-config/dbconfig.php
-Reports/config/dbconfig.php
+# ─── Credentials & Secrets ────────────────────────────────────────────────────
 .env
 config/dbconfig.php
+config/appconfig.php
 Reports/config/dbconfig.php
+Reports/config/appconfig.php
+assets/userprogress/config/dbconfig.php
+assets/userprogress/config/appconfig.php
+
+# Firebase service account keys
+cron/*.json
+*.json
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logfiles/*
+Reports/logfiles/*
+cron/*.log
+assets/userprogress/logfiles/*
+/var/log/
+
+# ─── User-generated content ───────────────────────────────────────────────────
+avatarpics/*
+!avatarpics/.gitkeep
+assets/bb5_0_5
+
+# ─── SVN artifacts (legacy VCS remnants) ──────────────────────────────────────
+.svn/
+
+# ─── PHP ──────────────────────────────────────────────────────────────────────
+vendor/
+composer.lock
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+# Keep docker-compose.yml but ignore override files with local secrets
+docker-compose.override.yml
+
+# ─── OS & Editor ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+*.bak
+*.tmp

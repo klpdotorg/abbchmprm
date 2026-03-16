@@ -1,0 +1,56 @@
+<?php
+   // Copy this file to appconfig.php and fill in your actual credentials.
+   // Never commit appconfig.php to version control.
+
+   // Maintenance mode: set to 'on' to redirect all traffic to a maintenance page
+   $cfg_maintenance = 'off';
+   $cfg_maintenancepage = 'undermaintenance.php';
+
+   // Use HTTPS — always true on production
+   $cfg_usehttps = false;
+
+   // Autoloader root directory
+   $cfg_autoload_includepath_rootdirectory = 'abs';
+
+   // Logging
+   $cfg_loggingOn = true;
+   $cfg_globalLogLevel = 7; // 7=INFO, 4=ERROR
+   $cfg_logfilename = "abslog.log";
+   $cfg_logrolloversize = 100; // MB
+   $cfg_maxarchivelogfiles = 5;
+
+   // Contact
+   $cfg_contactus_email = "your@email.com";
+   $cfg_AdminEmail = "your@email.com";
+
+   // Pagination
+   $cfg_number_of_records_perpage = 4;
+   $cfg_number_of_pagelinks = 5;
+
+   // File upload settings
+   $cfg_valid_imagefile_extensions    = "jpeg,jpg,pjpeg,gif";
+   $cfg_valid_documentfile_extensions = "doc,txt,pdf,pem";
+   $cfg_picture_maxsize  = 5000;
+   $cfg_avatarpics_dir = 'avatarpics';
+
+   // EkStep Telemetry API
+   $cfg_ekstepapi_url = "https://qa.ekstep.in/api/data/v3/telemetry";
+   $cfg_ekstepapi_token = 'YOUR_EKSTEP_API_TOKEN';
+
+   // Firebase Cloud Messaging (FCM v1 API)
+   // Download service account JSON from:
+   //   Firebase Console → Project Settings → Service Accounts → Generate new private key
+   $cfg_fcm_service_account_json_path = dirname(__FILE__) . '/../cron/YOUR_FIREBASE_SERVICE_ACCOUNT.json';
+   $cfg_fcm_project_id = 'YOUR_FIREBASE_PROJECT_ID';
+
+   // Reverse Geocoding — 'google' or 'mapmyindia'
+   $cfg_reversegeocodeapi_provider = 'google';
+
+   // MapMyIndia
+   $cfg_key_mapmyindiaapi = "YOUR_MAPMYINDIA_API_KEY";
+   $cfg_reversegeocodeapiurl_mapmyindia = "https://apis.mapmyindia.com/advancedmaps/v1/" . $cfg_key_mapmyindiaapi . "/rev_geocode?";
+
+   // Google Maps
+   $cfg_key_googleapi = "YOUR_GOOGLE_MAPS_API_KEY";
+   $cfg_reversegeocodeapiurl_google = "https://maps.google.com/maps/api/geocode/json?latlng=";
+?>

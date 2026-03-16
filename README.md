@@ -1,209 +1,301 @@
-# easymath-akshara
-EasyMath Akshara
+# EasyMath Akshara
 
-If this is first run:
+A PHP-based backend API for an educational mathematics gaming platform for children, built by [Akshara Foundation](https://akshara.org.in/). The app delivers math learning games across two modes — **Challenge Mode (CHM)** and **Problem-solving Mode (PRM)** — with multi-language support, push notifications, and analytics.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | PHP 7.4 |
+| Web Server | Apache 2.4 |
+| Database | MySQL 5.7 |
+| Containerization | Docker & Docker Compose |
+| Push Notifications | Firebase Cloud Messaging (FCM v1) |
+| Geocoding | Google Maps API / MapMyIndia |
+| External Sync | EkStep Telemetry API |
+
+---
+
+## Project Structure
+
+```
+abbchmprm/
+├── api/                    # REST API endpoints
+├── app/
+│   ├── boot/               # Bootstrap & autoloader
+│   └── classes/            # Core service classes
+├── assets/
+│   └── userprogress/       # User Progress sub-module (standalone mini-app)
+│       ├── api/
+│       │   ├── getuserprogress.php   # Returns full per-child progress breakdown
+│       │   └── getchild.php          # Retrieve child profile
+│       ├── app/
+│       │   ├── boot/                 # Bootstrap & autoloader
+│       │   └── classes/              # DAO and DB handler classes
+│       ├── config/
+│       │   ├── appconfig.php         # App config (copy from appconfig.php.example)
+│       │   ├── dbconfig.php          # DB credentials (copy from dbconfig.php.example)
+│       │   └── appglobals.php        # Global constants
+│       ├── errorhandler/             # Error handling
+│       ├── logging/                  # Logging utilities
+│       ├── logfiles/                 # Log output
+│       ├── objects/                  # Data objects (child, userprogress)
+│       ├── scripts/                  # JS utilities
+│       ├── servicefunctions/         # Business logic
+│       ├── utils/                    # Utility helpers
+│       └── .htaccess
+├── avatarpics/             # Profile picture storage
+├── config/
+│   ├── appconfig.php       # App configuration (copy from appconfig.php.example)
+│   └── dbconfig.php        # DB credentials (copy from dbconfig.php.example)
+├── cron/                   # Scheduled push notification jobs
+├── errorhandler/           # Error handling utilities
+├── ekstepsync/             # EkStep telemetry sync
+├── logfiles/               # Application logs
+├── logging/                # Logging utilities
+├── objects/                # Data object classes
+├── push/                   # FCM helpers
+├── Reports/                # Analytics & reporting module
+├── schema/                 # Database schema & migrations
+├── servicefunctions/       # Core business logic
+├── scripts/                # Utility scripts
+├── testclient/             # Testing utilities
+├── utils/                  # Utility functions
+├── docker-compose.yml
+└── .htaccess
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) and Docker Compose
+
+### 1. Configure the application
+
+Copy the example config files and fill in your credentials:
+
+```bash
+cp config/dbconfig.php.example config/dbconfig.php
+cp config/appconfig.php.example config/appconfig.php
+cp Reports/config/dbconfig.php.example Reports/config/dbconfig.php
+```
+
+Edit each file with your actual database credentials, API keys, and Firebase settings.
+
+### 2. Add Firebase Service Account
+
+Download your Firebase service account JSON from:
+> Firebase Console → Project Settings → Service Accounts → Generate new private key
+
+Place it in the `cron/` directory and update `$cfg_fcm_service_account_json_path` in `config/appconfig.php`.
+
+### 3. Start the application
+
+**First run:**
+```bash
 docker compose up -d
+```
 
-If you changed versions:
+**After changing Docker versions or config:**
+```bash
 docker compose down -v
 docker compose up -d
+```
 
-Project:
-http://localhost:8000
+### 4. Load the database schema
 
-phpMyAdmin:
-http://localhost:8080
+```bash
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/abbchmprmdb_latest_schema.sql
+```
 
-Login:
+Apply incremental migrations if needed (in order):
+```bash
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/push_notification_migration.sql
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/push_notification_messages_migration.sql
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/push_notification_log_columns_migration.sql
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/add_missing_fk_constraints.sql
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/add_push_notification_log_report.sql
+docker exec -i mysql_db mysql -u root -proot abbchmprmdb < schema/optimize_indexes.sql
+```
 
-Username: root
+---
 
-Password: root
+## Access Points
 
-If something fails, run:
-docker compose ps
-docker compose logs web
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| App / API | http://localhost:8000 | — |
+| Reports | http://localhost:8000/Reports/ | — |
+| phpMyAdmin | http://localhost:8080 | root / root |
 
-Run this:
-docker logs php_apache
+---
 
-OR for live logs:
-docker logs -f php_apache
+## API Reference
 
+All endpoints accept `POST` requests with JSON body.
 
-docker restart php_apache
-docker exec -it php_apache cat /var/www/html/.htaccess
+### Authentication & User Management
 
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/register.php` | Register a new child |
+| `POST /api/login.php` | Login with name & device ID |
+| `POST /api/getaccesstoken.php` | Get access token |
+| `POST /api/getchild.php` | Retrieve child profile |
+| `POST /api/updateprofile.php` | Update profile |
+| `POST /api/updateavatarpic.php` | Update avatar (base64) |
+| `POST /api/getavatarpic.php` | Retrieve avatar |
 
+### Game Data
 
-docker exec -it php_apache bash
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/rxabbchmgetgamemasterdata.php` | Get available CHM games |
+| `POST /api/txabbchmgameplay.php` | Submit CHM game session |
+| `POST /api/txabbchmgameplaydetail.php` | Submit CHM game session details |
+| `POST /api/txabbprmgameplay.php` | Submit PRM game session |
+| `POST /api/txabbprmgameplaydetail.php` | Submit PRM game session details |
 
-echo "display_errors=On" >> /usr/local/etc/php/conf.d/errors.ini
-echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/errors.ini
-exit
+### Scoring
 
-docker restart php_apache
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/txabbchmwalletscore.php` | Update wallet score (CHM) |
+| `POST /api/rxabbchmgetwalletscore.php` | Get wallet score (CHM) |
 
+### User Progress (sub-module at `/assets/userprogress/`)
 
-docker exec -i mysql_db mysql -u root -p mydb < /home/viven/Documents/abbchmprm_db.sql
-docker exec -i mysql_db mysql -u root -proot mydb < /home/viven/Documents/abbchmprm_db.sql
+| Endpoint | Description |
+|----------|-------------|
+| `POST /assets/userprogress/api/getuserprogress.php` | Returns full progress breakdown for a child (PRM & CHM scores across Number Sense, Number Operations, Measurement, and all sub-domains) |
+| `POST /assets/userprogress/api/getchild.php` | Retrieve child profile |
 
-docker inspect mysql_db | grep MYSQL
+**Request body:**
+```json
+{ "name": "<child_name>", "deviceid": "<device_id>" }
+```
 
-docker exec -it php_apache bash
-ls -l /var/www/html/Reports/logfiles
-chmod -R 777 /var/www/html/Reports/logfiles
+### Notifications & Sync
 
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/savefcmtoken.php` | Save FCM token for push notifications |
+| `POST /api/tracknotificationopen.php` | Track notification opens |
+| `POST /api/syncToEkStep.php` | Sync gameplay data to EkStep |
+| `POST /api/txabbprmekstepevents.php` | Push events to EkStep |
 
-docker exec -it mysql_db mysql -u root -proot
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
+---
 
+## Push Notifications
 
+The cron container runs `cron/push_notification_cron.php` on a schedule to send Firebase push notifications. Supported notification types:
 
-mysql -u root -p abbchmprmdb < schema/push_notification_migration.sql
-$cfg_fcm_server_key = 'YOUR_ACTUAL_KEY';
-Get it from: Firebase Console → Project Settings → Cloud Messaging → Server key
-POST /api/savefcmtoken.php
-{ "access_token": "<from login>", "fcm_token": "<from FCM plugin>" }
-0 9 * * * php /var/www/html/cron/push_notification_cron.php >> /var/log/push_cron.log 2>&1
+| Rule | Trigger | Throttle |
+|------|---------|---------|
+| `inactive_3days` | No login for 3–6 days | Once per 7 days |
+| `inactive_7days` | No login for 7–13 days | Once per 7 days |
+| `inactive_14days` | No login for 14–29 days | Once per 14 days |
+| `inactive_1month` | No login for 1–2 months | Once per 30 days |
+| `inactive_2months` | No login for 2–3 months | Once per 30 days |
+| `inactive_3months` | No login for 3+ months | Once per 30 days |
+| `reward_5games` | Crossed 5 total games | Once ever |
+| `daily_reminder` | No game in last 24 hrs (active within 7 days) | Once per 24 hrs |
+| `mid_game_3days` | Last game 1–3 days ago | Once per 24 hrs |
 
+**Supported languages:** English, Hindi, Kannada, Tamil, Telugu, Marathi, Gujarati, Odia, Urdu
 
-crontab -e
-*/5 * * * * php /home/viven/Documents/Akshara/abbchmprm/cron/push_notification_cron.php >> /var/log/push_cron.log 2>&1
-Breakdown:
+### Test push notifications manually
 
-*/5 = Every 5 minutes
-* = Every hour
-* = Every day of month
-* = Every month
-* = Every day of week
-php /path/to/cron/... = Command to run
->> /var/log/push_cron.log 2>&1 = Log output (create this file first)
-
-sudo touch /var/log/push_cron.log
-sudo chmod 666 /var/log/push_cron.log
-
-crontab -l
-
-tail -f /var/log/push_cron.log
-# or
-sudo journalctl -u cron --follow
-
-Interval	Crontab
-Every 5 minutes	*/5 * * * *
-Every 10 minutes	*/10 * * * *
-Every 15 minutes	*/15 * * * *
-Every 30 minutes	*/30 * * * *
-Every hour	0 * * * *
-Every day at 9 AM	0 9 * * *
-Every Monday at 8 AM	0 8 * * 1
-
-docker-compose up -d --force-recreate cron
-
-# Check if cron container is running
-docker ps | grep php_cron
-
-# View cron logs
-docker logs php_cron
-
-# Or stream logs in real-time
-docker logs -f php_cron
-
-# View the cron log file
-cat cron/push_cron.log
-
-# Or stream it
-tail -f cron/push_cron.log
-
-docker-compose exec cron php /var/www/html/cron/push_notification_cron.php
-docker-compose exec web php /var/www/html/cron/push_notification_cron.php
-
-docker-compose exec web php /var/www/html/push/test_fcm.php
-docker-compose exec cron php /var/www/html/push/test_fcm.php
-
-FirebaseMessaging.getInstance().getToken()
-    .addOnCompleteListener(task -> {
-        if (task.isSuccessful()) {
-            String token = task.getResult();
-            Log.d("FCM Token", token);
-        }
-    });
-
+```bash
 docker compose exec web php /var/www/html/push/test_fcm.php
+```
 
-Sending test notification to FCM token: cHjG8k9nM2pL5qR7sT...
+### View cron logs
 
-✅ SUCCESS! Notification sent
+```bash
+docker logs -f php_cron
+tail -f cron/push_cron.log
+```
 
-Response: {
-  "name": "projects/building-blocks-b0332/messages/7329484..."
-}
+### Rebuild cron container after changes
 
-❌ FAILED! Error: [error message]
-
-
-Rule	Tone	Example (English)
-inactive_3days	Gentle nudge	"It's been 3 days! Come back and keep your math skills sharp."
-inactive_7days	Stronger reminder	"A whole week! Come back — your streak is waiting!"
-inactive_14days	Urgent call to action	"It's been 2 weeks! Come back today — your math talent is waiting to shine!"
-
-Rule	Trigger	Throttle	Sent
-inactive_7days	No login for 7+ days	Once per 7 days	Repeatedly
-mid_game_3days	Last game 1–3 days ago	Once per 24 hrs	Repeatedly
-reward_5games	Crossed 5 total games	Never re-sent	Once ever
-daily_reminder	No game in last 24 hrs (but active within 7 days)	Once per 24 hrs	Repeatedly
-
-
-docker-compose exec db mysql -u root -proot mydb < /var/www/html/schema/push_notification_messages_migration.sql
-
+```bash
 docker compose down
 docker compose build cron
 docker compose up -d
+```
 
+---
 
--- Insert a test child that triggers 'inactive_3days' rule
--- (last_login set to 4 days ago, within the 3-6 day range)
-INSERT INTO child_tbl (child_name, deviceid, id_grade, school_type,	geo, district, id_language, organization,fcm_token, last_login, created_datetime)
-VALUES (
-    'Test Child',
-    'test-device-001',
-    1,                          -- any valid grade id
-    1,
-    '77.580643,12.972442',
-    'Bengaluru',
-    3,                          -- English
-    'My ORG',
-    'd1WA4L75QqWL-TCRvCNQfb:APA91bGp-ZyulBfqSFfn9uV2UEtgjUhgqd916zgP9KKH1mYMWti3Qih2tWpXsym-0XLL9USfL2qMalztisQTUPDez2yR74HjMD5nVBe-YaDhZIfSWQq4qOw',      -- paste your actual FCM token
-    DATE_SUB(NOW(), INTERVAL 5 DAY),  -- 4 days ago → triggers inactive_3days
-    NOW()
-);
+## Debugging
 
--- Run this after each cron fire to allow the next one
-DELETE FROM push_notification_log_tbl
-WHERE id_child = (SELECT id_child FROM child_tbl WHERE deviceid = 'test-device-001');
+Enable PHP error display inside the container:
 
-daily_reminder
+```bash
+docker exec -it php_apache bash -c "echo 'display_errors=On' >> /usr/local/etc/php/conf.d/errors.ini && echo 'error_reporting=E_ALL' >> /usr/local/etc/php/conf.d/errors.ini"
+docker restart php_apache
+```
 
--- Set last game session to 2 days ago (within 7 days but not in last 24h)
-INSERT INTO game_play_tbl (id_game_play,id_game, id_child, start_time)
-VALUES (
-    'CALhplpiqkzciro',
-    'NSNG1.1',
-    (SELECT id_child FROM child_tbl WHERE deviceid = 'test-device-001'),
-    DATE_SUB(NOW(), INTERVAL 2 DAY)
-    
-);
+View Apache logs:
 
--- Also set last_login to recently so inactive rules don't fire instead
-UPDATE child_tbl
-SET last_login = DATE_SUB(NOW(), INTERVAL 1 DAY)
-WHERE deviceid = 'test-device-001';
+```bash
+docker logs php_apache
+docker logs -f php_apache
+```
 
--- Reset throttle
-DELETE FROM push_notification_log_tbl
-WHERE id_child = (SELECT id_child FROM child_tbl WHERE deviceid = 'test-device-001')
-  AND notification_type = 'daily_reminder';
+Check container status:
 
+```bash
+docker compose ps
+docker compose logs web
+```
 
+Open a shell inside the container:
 
+```bash
+docker exec -it php_apache bash
+```
+
+---
+
+## Database Access
+
+Connect to MySQL directly:
+
+```bash
+docker exec -it mysql_db mysql -u root -proot
+```
+
+Grant full privileges (if needed):
+
+```sql
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+
+Fix log file permissions:
+
+```bash
+docker exec -it php_apache bash -c "chmod -R 777 /var/www/html/Reports/logfiles"
+```
+
+---
+
+## Supported Languages
+
+| ID | Language |
+|----|----------|
+| 1 | Tamil |
+| 2 | Kannada |
+| 3 | English |
+| 4 | Hindi |
+| 5 | Odia |
+| 6 | Gujarati |
+| 7 | Marathi |
+| 8 | Telugu |
+| 9 | Urdu |
