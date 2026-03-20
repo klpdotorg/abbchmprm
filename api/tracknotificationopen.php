@@ -42,6 +42,7 @@
 
     $valid_types = [
         'inactive_3days', 'inactive_7days', 'inactive_14days',
+        'inactive_1month', 'inactive_2months', 'inactive_3months',
         'mid_game_3days', 'reward_5games', 'daily_reminder'
     ];
 
