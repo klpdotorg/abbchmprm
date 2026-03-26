@@ -16,6 +16,7 @@
  * "deviceid":""
  * "avatarpic":"picture image as base64 encoded string"
  * "fcm_token":"" (optional - FCM device token for push notifications)
+ * "app_version_name":"" (optional - app build/version code)
  * }
  *    
  * JSON Response:
@@ -70,6 +71,7 @@
         $deviceid     = $data->{'deviceid'};
         $avatarpic    = $data->{'avatarpic'}; // The avatar image file as a base64 encoded string
         $fcm_token    = isset($data->{'fcm_token'}) ? $data->{'fcm_token'} : null;
+        $app_version_name = isset($data->{'app_version_name'}) ? trim($data->{'app_version_name'}) : null;
   
         if($childname && $deviceid && $grade && $language){
         
@@ -144,7 +146,8 @@
                   // Return the access_token on registration completion (considered as logged-in)
                   $access_token = createAccessToken();
                   $created_datetime = date('Y-m-d H:i:s') ;
-                  saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime);
+                //   saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime);
+                  saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime,$app_version_name);
                   
                   $responsedata = array(
                     'status' => "success",

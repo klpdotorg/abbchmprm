@@ -17,3 +17,6 @@ CREATE TABLE IF NOT EXISTS `push_notification_log_tbl` (
     PRIMARY KEY (`id`),
     KEY `idx_push_log` (`id_child`, `notification_type`, `sent_datetime`)
 ) ENGINE = InnoDB;
+
+ALTER TABLE `device_accesstoken_tbl`
+ADD COLUMN `app_version_name` VARCHAR(100) NULL AFTER `devicetype`;

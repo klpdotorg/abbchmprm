@@ -38,17 +38,29 @@ function checkIfAccessTokenExistsForChildForDevice($childid,$deviceid){
     return $rtn;
 }
 
-function updateAccessToken($childid,$deviceid,$access_token, $created_datetime){
+function updateAccessToken($childid,$deviceid,$access_token, $created_datetime, $app_version_name = null){
    
     $servicefunctions_dao=new servicefunctions_dao();
-    $servicefunctions_dao->updateAccessToken($childid,$deviceid,$access_token, $created_datetime);
+    return $servicefunctions_dao->updateAccessToken($childid,$deviceid,$access_token, $created_datetime, $app_version_name);
 }
 
-function saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime){
+function saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime,$app_version_name = null){
    
     $servicefunctions_dao=new servicefunctions_dao();
-    $servicefunctions_dao->saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime);
+    return $servicefunctions_dao->saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime,$app_version_name);
 }
+
+// function updateAccessToken($childid,$deviceid,$access_token, $created_datetime){
+   
+//     $servicefunctions_dao=new servicefunctions_dao();
+//     $servicefunctions_dao->updateAccessToken($childid,$deviceid,$access_token, $created_datetime);
+// }
+
+// function saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime){
+   
+//     $servicefunctions_dao=new servicefunctions_dao();
+//     $servicefunctions_dao->saveNewAccessTokenForChildForDevice($childid,$deviceid,$access_token,$created_datetime);
+// }
 
 function checkIfValidAccessToken($access_token){
     
@@ -390,6 +402,12 @@ function getDistrictFromGeocode($lat, $lng) {
     }
 
     return $district;
+}
+
+function updateAppVersionByAccessToken($access_token, $app_version_name) {
+
+    $servicefunctions_dao = new servicefunctions_dao();
+    return $servicefunctions_dao->updateAppVersionByAccessToken($access_token, $app_version_name);
 }
 
 function updateDistrict($district,$childid) {

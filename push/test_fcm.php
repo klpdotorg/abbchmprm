@@ -31,7 +31,7 @@ global $cfg_fcm_service_account_json_path, $cfg_fcm_project_id;
 // ================================================================
 // CONFIG — edit these before running
 // ================================================================
-$test_fcm_token   = 'crJO1sMtSvCi2kiALxy2fe:APA91bENJoxTNEX6Eu3mQPi5swl0VfxLWC6jwFg8TnIkbasgtp5VqyLT3iltCydQCv3YP6uZn91uvfLwenoLYKR7OvSOYT8D_uTFqR2MJMTCAiUeh3GclHs';
+$test_fcm_token   = 'cBSw5lq3Q322t6lrAHLWMG:APA91bHEEjGG4XAkx7WfK6_GcvZdHK8_Q8xov63z7Wo3A-o554_u-nXCDKOwFCbjcnT_7LV_SERBzUhvS1aM5FpZl7SJLv9A8he8_M9db8MLRRzR6CSOhdM';
 $test_language_id = 3;   // language to use for message text
 $test_child_id    = 1;   // id_child to log against (use a real child id from your DB)
 // ================================================================

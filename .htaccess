@@ -36,3 +36,4 @@ RewriteRule ^txabbchmwalletscore$ /api/txabbchmwalletscore.php?friendlyurl=$1&%{
 RewriteRule ^rxabbchmgetwalletscore$ /api/rxabbchmgetwalletscore.php?friendlyurl=$1&%{QUERY_STRING}
 RewriteRule ^rxabbchmgetgamemasterdata$ /api/rxabbchmgetgamemasterdata.php?friendlyurl=$1&%{QUERY_STRING}
 
+RewriteRule ^tracknotificationopen$ /api/tracknotificationopen.php?friendlyurl=$1&%{QUERY_STRING}
