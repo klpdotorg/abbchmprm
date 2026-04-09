@@ -20,7 +20,15 @@
  * @param int    $id_language - language ID from child_tbl
  * @return array ['title' => string, 'body' => string]
  */
-function getNotificationText($type, $id_language) {
+function replaceNotificationTextPlaceholders($text, $replacements) {
+    foreach ($replacements as $key => $value) {
+        $placeholder = '{' . $key . '}';
+        $text = str_replace($placeholder, $value, $text);
+    }
+    return $text;
+}
+
+function getNotificationText($type, $id_language, $replacements = array()) {
 
     $dbh  = services_dbhandler::getInstance();
     $lang = intval($id_language);
@@ -38,10 +46,26 @@ function getNotificationText($type, $id_language) {
     $rows = $dbh->fetchAssocList();
 
     if (!empty($rows)) {
-        return array('title' => $rows[0]['title'], 'body' => $rows[0]['body']);
+        $title = $rows[0]['title'];
+        $body  = $rows[0]['body'];
+
+        if (!empty($replacements)) {
+            $title = replaceNotificationTextPlaceholders($title, $replacements);
+            $body  = replaceNotificationTextPlaceholders($body, $replacements);
+        }
+
+        return array('title' => $title, 'body' => $body);
     }
 
     // Hard fallback if DB has no entry at all
-    return array('title' => 'Practice Math Today!', 'body' => 'Open the app and play a game!');
+    $title = 'Practice Math Today!';
+    $body  = 'Open the app and play a game!';
+
+    if (!empty($replacements)) {
+        $title = replaceNotificationTextPlaceholders($title, $replacements);
+        $body  = replaceNotificationTextPlaceholders($body, $replacements);
+    }
+
+    return array('title' => $title, 'body' => $body);
 }
 ?>

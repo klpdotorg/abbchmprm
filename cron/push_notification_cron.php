@@ -98,9 +98,17 @@ function logNotification($dbh, $childid, $type, $status, $fcm_message_id, $error
 function sendAndLog($fcm, $dbh, $logmgr, $row, $type, $cron_run_id) {
 
     $id_language = isset($row['id_language']) ? intval($row['id_language']) : 3;
-    $text        = getNotificationText($type, $id_language);
+    $replacements = array();
+    $data = array('notification_type' => $type);
 
-    $result = $fcm->sendPushNotification($row['fcm_token'], $text['title'], $text['body'], ['notification_type' => $type]);
+    if (!empty($row['game_description'])) {
+        $replacements['game'] = $row['game_description'];
+        $data['game_name'] = $row['game_description'];
+    }
+
+    $text = getNotificationText($type, $id_language, $replacements);
+
+    $result = $fcm->sendPushNotification($row['fcm_token'], $text['title'], $text['body'], $data);
 
     if ($result['success']) {
         $fcm_message_id = isset($result['response']['name']) ? $result['response']['name'] : null;
@@ -109,6 +117,12 @@ function sendAndLog($fcm, $dbh, $logmgr, $row, $type, $cron_run_id) {
     } else {
         logNotification($dbh, $row['id_child'], $type, 'failed', null, $result['error'], $row['fcm_token'], $id_language, $cron_run_id);
         $logmgr->logInfo("push_notification_cron [$type]: FAILED for child " . $row['id_child'] . " - " . $result['error']);
+        if (strpos($result['error'], 'Requested entity was not found.') !== false) {
+            // Mark token as invalid
+            $query = "UPDATE child_tbl SET fcm_token = NULL WHERE id_child = " . intval($row['id_child']);
+            $dbh->executeQuery($query);
+            $logmgr->logInfo("push_notification_cron: Invalidated token for child " . $row['id_child']);
+        }
     }
 }
 
@@ -244,22 +258,50 @@ if ($inactive_3m_children) {
 }
 
 // ================================================================
-// RULE 2: Left mid-game (last game played 1-3 days ago, not today)
-// Condition: most recent game session started between 24h and 3 days ago
+// RULE 2: Left mid-game (session started 1-3 days ago but did not finish all questions)
+// Condition: session exists and answered question count is less than the full game question count
 // Throttle:  don't re-send within 24 hours
 // ================================================================
 $query_midgame = "SELECT C.id_child, C.child_name, C.fcm_token, C.id_language,
-                         MAX(G.start_time) AS last_game_time
+                         MAX(COALESCE(GM.game_description, CHM.game_description)) AS game_description
                   FROM child_tbl C
                   JOIN (
-                      SELECT id_child, start_time FROM game_play_tbl
+                      SELECT G.id_child, G.id_game
+                      FROM game_play_tbl G
+                      JOIN (
+                          SELECT id_game_play, COUNT(DISTINCT id_question) AS answered_count
+                          FROM game_play_detail_tbl
+                          GROUP BY id_game_play
+                      ) D ON D.id_game_play = G.id_game_play
+                      JOIN (
+                          SELECT id_game, COUNT(*) AS total_questions
+                          FROM question_tbl
+                          GROUP BY id_game
+                      ) Q ON Q.id_game = G.id_game
+                      WHERE G.start_time < DATE_SUB(NOW(), INTERVAL 1 DAY)
+                        AND G.start_time > DATE_SUB(NOW(), INTERVAL 3 DAY)
+                        AND D.answered_count < Q.total_questions
                       UNION ALL
-                      SELECT id_child, start_time FROM chm_game_play_tbl
-                  ) G ON G.id_child = C.id_child
+                      SELECT G.id_child, G.id_game
+                      FROM chm_game_play_tbl G
+                      JOIN (
+                          SELECT id_game_play, COUNT(DISTINCT id_question) AS answered_count
+                          FROM chm_game_play_detail_tbl
+                          GROUP BY id_game_play
+                      ) D ON D.id_game_play = G.id_game_play
+                      JOIN (
+                          SELECT id_game, COUNT(*) AS total_questions
+                          FROM chm_question_master_tbl
+                          GROUP BY id_game
+                      ) Q ON Q.id_game = G.id_game
+                      WHERE G.start_time < DATE_SUB(NOW(), INTERVAL 1 DAY)
+                        AND G.start_time > DATE_SUB(NOW(), INTERVAL 3 DAY)
+                        AND D.answered_count < Q.total_questions
+                  ) S ON S.id_child = C.id_child
+                  LEFT JOIN game_master_tbl GM ON GM.id_game = S.id_game
+                  LEFT JOIN chm_game_master_tbl CHM ON CHM.id_game = S.id_game
                   WHERE C.fcm_token IS NOT NULL
-                  GROUP BY C.id_child, C.child_name, C.fcm_token, C.id_language
-                  HAVING last_game_time < DATE_SUB(NOW(), INTERVAL 24 HOUR)
-                     AND last_game_time > DATE_SUB(NOW(), INTERVAL 3 DAY)";
+                  GROUP BY C.id_child, C.child_name, C.fcm_token, C.id_language";
 
 $dbh->executeQuery($query_midgame);
 $midgame_children = $dbh->fetchAssocList();

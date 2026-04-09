@@ -5,7 +5,13 @@
 * This file has all the database handler functions
 */
 //require_once(dirname(__FILE__)."/../config/dbconfig.php");
-require_once($_SESSION['ABSAPP_DB_CONFIG_FILE']);
+// require_once($_SESSION['ABSAPP_DB_CONFIG_FILE']);
+if (isset($_SESSION['ABSAPP_DB_CONFIG_FILE']) && file_exists($_SESSION['ABSAPP_DB_CONFIG_FILE'])) {
+    require_once($_SESSION['ABSAPP_DB_CONFIG_FILE']);
+} else {
+    // Fallback for cron / CLI
+    require_once(__DIR__ . '/../../config/dbconfig.php');
+}
 
 class services_dbhandler {
 

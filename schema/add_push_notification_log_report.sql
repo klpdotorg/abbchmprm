@@ -39,15 +39,15 @@ INSERT INTO `reports_chm_tbl` (`report_id`, `report_code`, `report_name`, `view_
 
 -- Step 4: Define report columns
 INSERT INTO `report_chm_columns_tbl` (`report_column_auto_id`, `report_id`, `report_column_seqid`, `report_column_name`, `report_column_label`, `column_datatype`) VALUES
-(99,  21, 1, 'child_name',        'Child Name',        'varchar'),
-(100, 21, 2, 'notification_type', 'Notification Type', 'varchar'),
-(101, 21, 3, 'sent_datetime',     'Sent At',           'datetime'),
-(102, 21, 4, 'delivery_status',   'Status',            'varchar'),
-(103, 21, 5, 'is_opened',         'Opened',            'integer'),
-(104, 21, 6, 'opened_datetime',   'Opened At',         'datetime'),
-(105, 21, 7, 'fcm_message_id',    'FCM Message ID',    'varchar'),
-(106, 21, 8, 'error_message',     'Error',             'varchar'),
-(107, 21, 9, 'cron_run_id',       'Cron Run ID',       'varchar');
+(101,  21, 1, 'child_name',        'Child Name',        'varchar'),
+(102, 21, 2, 'notification_type', 'Notification Type', 'varchar'),
+(103, 21, 3, 'sent_datetime',     'Sent At',           'datetime'),
+(104, 21, 4, 'delivery_status',   'Status',            'varchar'),
+(105, 21, 5, 'is_opened',         'Opened',            'integer'),
+(106, 21, 6, 'opened_datetime',   'Opened At',         'datetime'),
+(107, 21, 7, 'fcm_message_id',    'FCM Message ID',    'varchar'),
+(108, 21, 8, 'error_message',     'Error',             'varchar'),
+(109, 21, 9, 'cron_run_id',       'Cron Run ID',       'varchar');
 
 -- Step 5: Define filter (whereclause) options
 INSERT INTO `report_chm_whereclause_tbl` (`report_whereclause_auto_id`, `report_id`, `report_whereclause_seqid`, `report_whereclause_column_name`, `report_whereclause_column_label`, `wc_datatype`, `column_data_prefix`, `default_value`) VALUES
