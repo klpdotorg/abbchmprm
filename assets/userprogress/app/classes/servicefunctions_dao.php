@@ -1,40 +1,92 @@
 <?php
 
-class servicefunctions_dao {
+class servicefunctions_dao
+{
 
     private $dbh; // dbhandler object
-    
-    function __construct() {
-        
-        $this->dbh = services_dbhandler::getInstance();         
+
+    function __construct()
+    {
+
+        $this->dbh = services_dbhandler::getInstance();
     }
-    
-    
-    
-	
-	function checkIfNameAndDeviceRegistered($childname, $deviceid) {
 
-	    $additional_condition = " and  deviceid = '$deviceid'";
-	    $arrResult = $this->dbh->readRecords('child_tbl','id_child','child_name',$childname, $additional_condition);
 
-	    if(count($arrResult,1) == 0) return false;
-	    else return true;
-	}
-      
-	
-    
-    function getChildByNameAndDevice($childname, $deviceid) {
-        
+    function checkIfNameDeviceAndGradeRegistered($childname, $deviceid, $grade)
+    {
+        $gradeid = $this->getGradeIdByGradeName($grade);
+        if (!$gradeid)
+            return false;
+
+        $additional_condition = " AND deviceid = '$deviceid' AND id_grade = '$gradeid'";
+        $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $childname, $additional_condition);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return true;
+    }
+
+    function getChildByNameDeviceAndGrade($childname, $deviceid, $grade)
+    {
+        $gradeid = $this->getGradeIdByGradeName($grade);
+        if (!$gradeid)
+            return false;
+
+        $query = "SELECT C.*, G.description AS gradedescr, L.description AS langdescr
+              FROM child_tbl C
+              JOIN grade_tbl G ON C.id_grade = G.id_grade
+              JOIN language_tbl L ON C.id_language = L.id_language
+              WHERE C.child_name = '$childname'
+              AND C.deviceid = '$deviceid'
+              AND C.id_grade = '$gradeid'";
+
+        $arrResult = $this->dbh->readRecordsWithQuery($query);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $this->createChildObject($arrResult[0]);
+    }
+
+    function getGradeIdByGradeName($gradename)
+    {
+        $arrResult = $this->dbh->readRecords('grade_tbl', 'id_grade', 'description', $gradename);
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['id_grade'];
+    }
+
+
+    function checkIfNameAndDeviceRegistered($childname, $deviceid)
+    {
+
+        $additional_condition = " and  deviceid = '$deviceid'";
+        $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $childname, $additional_condition);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return true;
+    }
+
+
+
+    function getChildByNameAndDevice($childname, $deviceid)
+    {
+
         $query = "SELECT C.*, G.description AS gradedescr, L.description AS langdescr
                  FROM child_tbl C
                  JOIN grade_tbl G ON C.id_grade = G.id_grade
                  JOIN language_tbl L ON C.id_language = L.id_language
                  WHERE C.child_name = '$childname' AND C.deviceid = '$deviceid'";
-      
+
         $arrResult = $this->dbh->readRecordsWithQuery($query);
-        
-        
-        if(count($arrResult,1) == 0) return false;
+
+
+        if (count($arrResult, 1) == 0)
+            return false;
         else {
             $objChild = $this->createChildObject($arrResult[0]);
             return $objChild;
@@ -42,10 +94,11 @@ class servicefunctions_dao {
     }
 
 
-    private function createChildObject($arrData) {
-          
+    private function createChildObject($arrData)
+    {
+
         $objChild = new child();
-          
+
         $objChild->setChildId($arrData['id_child']);
         $objChild->setChildName(stripslashes($arrData['child_name']));
         $objChild->setDeviceId($arrData['deviceid']);
@@ -57,13 +110,14 @@ class servicefunctions_dao {
         $objChild->setLanguageId($arrData['id_language']);
         $objChild->setLanguageName($arrData['langdescr']);
         $objChild->setPicFileName($arrData['avatar_pic']);
-        
+
         return $objChild;
     }
-      
+
     //to get user progress details
-    function getChildUserProgress($childid) {
-        
+    function getChildUserProgress($childid)
+    {
+
         //PNS -> Practice mode Number Sense
         //PNO -> Practice mode Number Operation
         //PM -> Practice mode Measurement
@@ -102,7 +156,16 @@ class servicefunctions_dao {
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NOM%' AND id_child = '$childid') AS PNOM,
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NOD%' AND id_child = '$childid') AS PNOD,
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NOLD%' AND id_child = '$childid') AS PNOLD,
-                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NOLM%' AND id_child = '$childid') AS PNOLM,";
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NOLM%' AND id_child = '$childid') AS PNOLM,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'AL%' AND id_child = '$childid') AS PALG, 
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND (id_game like 'GM%') AND id_child = '$childid') AS PGM,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND (id_game like 'NS_IN%') AND id_child = '$childid') AS PNSI,
+                -- ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND (id_game like 'NSF%') AND id_child = '$childid') AS PNSF,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NSD%' AND id_child = '$childid') AS PNSD,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NSR%' AND id_child = '$childid') AS PNSR,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'ALGV%' AND id_child = '$childid') AS PALGV,
+                -- ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'GM%' AND id_child = '$childid') AS PGMS,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND (id_game like 'GMPR%' OR id_game like 'GMM%') AND id_child = '$childid') AS PGMM,";
 
         //challenge mode query
         $query .= "( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid') AS PMST,
@@ -204,8 +267,9 @@ class servicefunctions_dao {
 
 
         $arrResult = $this->dbh->readRecordsWithQuery($query);
-        
-        if(count($arrResult,1) == 0) return false;
+
+        if (count($arrResult, 1) == 0)
+            return false;
         else {
             $objChild = $this->getChildUserProgressObject($arrResult[0]);
             return $objChild;
@@ -213,11 +277,12 @@ class servicefunctions_dao {
         }
     }
 
-    private function getChildUserProgressObject($arrData) {
-        
+    private function getChildUserProgressObject($arrData)
+    {
+
         $objGameplay = new userprogress();
-        
-   
+
+
         $objGameplay->setPMST($arrData['PMST']);
         $objGameplay->setCMST($arrData['CMST']);
 
@@ -251,8 +316,16 @@ class servicefunctions_dao {
         $objGameplay->setPNOLD($arrData['PNOLD']);
         $objGameplay->setPNOLM($arrData['PNOLM']);
 
+        $objGameplay->setPALGT($arrData['PALGT']);
+        $objGameplay->setPALG($arrData['PALG']);
+        $objGameplay->setPGM($arrData['PGM']);
+        $objGameplay->setPALGV($arrData['PALGV']);
+        $objGameplay->setPGMS($arrData['PGMS']);
+        $objGameplay->setPGMM($arrData['PGMM']);
 
-         $objGameplay->setCNS($arrData['CNS']);
+
+
+        $objGameplay->setCNS($arrData['CNS']);
         $objGameplay->setCNO($arrData['CNO']);
         $objGameplay->setCM($arrData['CM']);
         $objGameplay->setCNSN($arrData['CNSN']);
@@ -303,7 +376,7 @@ class servicefunctions_dao {
         $objGameplay->setCNOMF($arrData['CNOMF']);
         $objGameplay->setCNODF($arrData['CNODF']);
 
-         $objGameplay->setCNST($arrData['CNST']);
+        $objGameplay->setCNST($arrData['CNST']);
         $objGameplay->setCNOT($arrData['CNOT']);
         $objGameplay->setCMT($arrData['CMT']);
         $objGameplay->setCNSNT($arrData['CNSNT']);
@@ -320,7 +393,7 @@ class servicefunctions_dao {
         $objGameplay->setCNOMT($arrData['CNOMT']);
         $objGameplay->setCNODT($arrData['CNODT']);
 
-         $objGameplay->setCNSH($arrData['CNSH']);
+        $objGameplay->setCNSH($arrData['CNSH']);
         $objGameplay->setCNOH($arrData['CNOH']);
         $objGameplay->setCMH($arrData['CMH']);
         $objGameplay->setCNSNH($arrData['CNSNH']);
@@ -337,7 +410,7 @@ class servicefunctions_dao {
         $objGameplay->setCNOMH($arrData['CNOMH']);
         $objGameplay->setCNODH($arrData['CNODH']);
 
-         
+
         return $objGameplay;
     }
 

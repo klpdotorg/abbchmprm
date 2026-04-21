@@ -20,3 +20,6 @@ CREATE TABLE IF NOT EXISTS `push_notification_log_tbl` (
 
 ALTER TABLE `device_accesstoken_tbl`
 ADD COLUMN `app_version_name` VARCHAR(100) NULL AFTER `devicetype`;
+
+ALTER TABLE child_tbl
+ADD UNIQUE KEY uk_child_name_device_grade (child_name, deviceid, id_grade);

@@ -16,20 +16,92 @@ class servicefunctions_dao
     {
 
         $additional_condition = "";
-        $arrResult =  $this->dbh->readRecords('device_accesstoken_tbl', 'id_child', 'access_token', $access_token, $additional_condition);
+        $arrResult = $this->dbh->readRecords('device_accesstoken_tbl', 'id_child', 'access_token', $access_token, $additional_condition);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['id_child'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['id_child'];
     }
+
+    function getChildIdByNameDeviceAndGrade($name, $deviceid, $grade)
+    {
+        $gradeid = $this->getGradeIdByGradeName($grade);
+        if (!$gradeid)
+            return false;
+
+        $additional_condition = " AND deviceid = '$deviceid' AND id_grade = '$gradeid'";
+        $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $name, $additional_condition);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['id_child'];
+    }
+
+    function getAccessTokenForChildForDeviceAndGrade($name, $deviceid, $grade)
+    {
+        $childid = $this->getChildIdByNameDeviceAndGrade($name, $deviceid, $grade);
+        if (!$childid)
+            return false;
+
+        $additional_condition = " AND deviceid = '$deviceid'";
+        $arrResult = $this->dbh->readRecords('device_accesstoken_tbl', 'access_token', 'id_child', $childid, $additional_condition);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['access_token'];
+    }
+
+    function checkIfNameDeviceAndGradeRegistered($childname, $deviceid, $grade)
+    {
+        $gradeid = $this->getGradeIdByGradeName($grade);
+        if (!$gradeid)
+            return false;
+
+        $additional_condition = " AND deviceid = '$deviceid' AND id_grade = '$gradeid'";
+        $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $childname, $additional_condition);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return true;
+    }
+
+    function getChildByNameDeviceAndGrade($childname, $deviceid, $grade)
+    {
+        $gradeid = $this->getGradeIdByGradeName($grade);
+        if (!$gradeid)
+            return false;
+
+        $query = "SELECT C.*, G.description AS gradedescr, L.description AS langdescr
+              FROM child_tbl C
+              JOIN grade_tbl G ON C.id_grade = G.id_grade
+              JOIN language_tbl L ON C.id_language = L.id_language
+              WHERE C.child_name = '$childname'
+              AND C.deviceid = '$deviceid'
+              AND C.id_grade = '$gradeid'";
+
+        $arrResult = $this->dbh->readRecordsWithQuery($query);
+
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $this->createChildObject($arrResult[0]);
+    }
+
 
     function getChildIdByNameAndDevice($name, $deviceid)
     {
 
         $additional_condition = " AND deviceid = '$deviceid'";
-        $arrResult =  $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $name, $additional_condition);
+        $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $name, $additional_condition);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['id_child'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['id_child'];
     }
 
     function getAccessTokenForChildForDevice($name, $deviceid)
@@ -41,10 +113,12 @@ class servicefunctions_dao
         }
 
         $additional_condition = " AND deviceid = '$deviceid'";
-        $arrResult =  $this->dbh->readRecords('device_accesstoken_tbl', 'access_token', 'id_child', $childid, $additional_condition);
+        $arrResult = $this->dbh->readRecords('device_accesstoken_tbl', 'access_token', 'id_child', $childid, $additional_condition);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['access_token'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['access_token'];
     }
 
     function checkIfAccessTokenExistsForChildForDevice($id_child, $deviceid)
@@ -53,8 +127,10 @@ class servicefunctions_dao
         $additional_condition = " and  deviceid = '$deviceid'";
         $arrResult = $this->dbh->readRecords('device_accesstoken_tbl', 'access_token', 'id_child', $id_child, $additional_condition);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return true;
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return true;
     }
 
     function checkIfNameAndDeviceRegistered($childname, $deviceid)
@@ -63,8 +139,10 @@ class servicefunctions_dao
         $additional_condition = " and  deviceid = '$deviceid'";
         $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $childname, $additional_condition);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return true;
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return true;
     }
 
     function updateAccessToken($id_child, $deviceid, $access_token, $created_datetime, $app_version_name = null)
@@ -136,8 +214,10 @@ class servicefunctions_dao
         $additional_condition = "";
         $arrResult = $this->dbh->readRecords('device_accesstoken_tbl', 'id', 'access_token', $access_token, $additional_condition);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return true;
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return true;
     }
 
     function updateDistrict($district, $childid)
@@ -165,8 +245,8 @@ class servicefunctions_dao
 
         $data = array(
 
-            'child_name'       =>  $objChild->getChildName(),
-            'deviceid'       =>  $objChild->getDeviceId(),
+            'child_name' => $objChild->getChildName(),
+            'deviceid' => $objChild->getDeviceId(),
             'id_grade' => $gradeid,
             'school_type' => $objChild->getSchoolTypeId(),
             'geo' => $objChild->getGeo(),
@@ -218,7 +298,8 @@ class servicefunctions_dao
 
 
 
-        if (count($arrResult, 1) == 0) return false;
+        if (count($arrResult, 1) == 0)
+            return false;
         else {
             $objChild = $this->createChildObject($arrResult[0]);
             return $objChild;
@@ -229,7 +310,8 @@ class servicefunctions_dao
     {
 
         $childid = getChildIdByAccessToken($access_token);
-        if (!$childid) return false;
+        if (!$childid)
+            return false;
 
         return getChildByChildId($childid);
     }
@@ -246,7 +328,8 @@ class servicefunctions_dao
         $arrResult = $this->dbh->readRecordsWithQuery($query);
 
 
-        if (count($arrResult, 1) == 0) return false;
+        if (count($arrResult, 1) == 0)
+            return false;
         else {
             $objChild = $this->createChildObject($arrResult[0]);
             return $objChild;
@@ -279,8 +362,10 @@ class servicefunctions_dao
         $condition = " AND id_grade = $gradeid";
         $arrResult = $this->dbh->readRecords('grade_tbl', 'description', 'id_grade', $gradeid);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['description'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['description'];
     }
 
     function getGradeIdByGradeName($gradename)
@@ -289,8 +374,10 @@ class servicefunctions_dao
         $condition = " AND description = '$gradename'";
         $arrResult = $this->dbh->readRecords('grade_tbl', 'id_grade', 'description', $gradename);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['id_grade'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['id_grade'];
     }
 
     function getLanguageNameByLanguageId($langid)
@@ -299,8 +386,10 @@ class servicefunctions_dao
         $condition = " AND id_language = $langid";
         $arrResult = $this->dbh->readRecords('language_tbl', 'description', 'id_language', $langid);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['description'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['description'];
     }
 
     function getLanguageIdByLanguageName($langname)
@@ -309,23 +398,28 @@ class servicefunctions_dao
         $condition = " AND description = '$langname'";
         $arrResult = $this->dbh->readRecords('language_tbl', 'id_language', 'description', $langname);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['id_language'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['id_language'];
     }
 
     function getAvatarpicFilenameByChildId($child_id)
     {
 
-        $arrResult =  $this->dbh->readRecords('child_tbl', 'avatar_pic', 'id_child', $child_id);
+        $arrResult = $this->dbh->readRecords('child_tbl', 'avatar_pic', 'id_child', $child_id);
 
-        if (count($arrResult, 1) == 0) return false;
-        else return $arrResult[0]['avatar_pic'];
+        if (count($arrResult, 1) == 0)
+            return false;
+        else
+            return $arrResult[0]['avatar_pic'];
     }
 
     function updateAvatarpicFilenameByChildId($child_id, $picfilename)
     {
 
-        if (!$child_id) return false;
+        if (!$child_id)
+            return false;
 
         $data = array(
             'avatar_pic' => $picfilename
@@ -341,13 +435,13 @@ class servicefunctions_dao
 
         $data = array(
 
-            'id_child'             => $objGameplaydetail->getChildId(),
-            'id_game_play'         => $objGameplaydetail->getGamePlayId(),
-            'id_question'          => $objGameplaydetail->getQuestionId(),
-            'pass'                 => $objGameplaydetail->getPass(),
-            'attempts'             => $objGameplaydetail->getAttempts(),
+            'id_child' => $objGameplaydetail->getChildId(),
+            'id_game_play' => $objGameplaydetail->getGamePlayId(),
+            'id_question' => $objGameplaydetail->getQuestionId(),
+            'pass' => $objGameplaydetail->getPass(),
+            'attempts' => $objGameplaydetail->getAttempts(),
             'date_time_submission' => $objGameplaydetail->getDateTimeSubmission(),
-            'time2answer'          => $objGameplaydetail->getTime2Answer()
+            'time2answer' => $objGameplaydetail->getTime2Answer()
         );
 
         $rtn = $this->dbh->insertRecords('game_play_detail_tbl', $data);
@@ -359,12 +453,12 @@ class servicefunctions_dao
 
         $data = array(
 
-            'id_child'             => $objGameplaydetail->getChildId(),
-            'id_game_play'         => $objGameplaydetail->getGamePlayId(),
-            'id_question'          => $objGameplaydetail->getQuestionId(),
-            'pass'                 => $objGameplaydetail->getPass(),
+            'id_child' => $objGameplaydetail->getChildId(),
+            'id_game_play' => $objGameplaydetail->getGamePlayId(),
+            'id_question' => $objGameplaydetail->getQuestionId(),
+            'pass' => $objGameplaydetail->getPass(),
             'date_time_submission' => $objGameplaydetail->getDateTimeSubmission(),
-            'time2answer'          => $objGameplaydetail->getTime2Answer()
+            'time2answer' => $objGameplaydetail->getTime2Answer()
         );
 
         $rtn = $this->dbh->insertRecords('chm_game_play_detail_tbl', $data);
@@ -381,7 +475,8 @@ class servicefunctions_dao
 
         $arrResult = $this->dbh->readRecordsWithQuery($query);
 
-        if (count($arrResult, 1) == 0) return false;
+        if (count($arrResult, 1) == 0)
+            return false;
         else {
             $objGameplaydetail = $this->createGameplaydetailObject($arrResult[0]);
             return $objGameplaydetail;
@@ -417,10 +512,10 @@ class servicefunctions_dao
 
         $data = array(
 
-            'id_game_play'         => $objGameplay->getGamePlayId(),
-            'id_child'             => $objGameplay->getChildId(),
-            'id_game'              => $objGameplay->getGameId(),
-            'start_time'           => $objGameplay->getStartTime()
+            'id_game_play' => $objGameplay->getGamePlayId(),
+            'id_child' => $objGameplay->getChildId(),
+            'id_game' => $objGameplay->getGameId(),
+            'start_time' => $objGameplay->getStartTime()
         );
 
         $rtn = $this->dbh->insertRecords('game_play_tbl', $data);
@@ -432,11 +527,11 @@ class servicefunctions_dao
 
         $data = array(
 
-            'id_game_play'         => $objGameplay->getGamePlayId(),
-            'id_child'             => $objGameplay->getChildId(),
-            'id_game'              => $objGameplay->getGameId(),
-            'start_time'           => $objGameplay->getStartTime(),
-            'hints'                => $objGameplay->getHints()
+            'id_game_play' => $objGameplay->getGamePlayId(),
+            'id_child' => $objGameplay->getChildId(),
+            'id_game' => $objGameplay->getGameId(),
+            'start_time' => $objGameplay->getStartTime(),
+            'hints' => $objGameplay->getHints()
         );
 
         $rtn = $this->dbh->insertRecords('chm_game_play_tbl', $data);
@@ -453,7 +548,8 @@ class servicefunctions_dao
 
         $arrResult = $this->dbh->readRecordsWithQuery($query);
 
-        if (count($arrResult, 1) == 0) return false;
+        if (count($arrResult, 1) == 0)
+            return false;
         else {
             $objGameplay = $this->createGameplayObject($arrResult[0]);
             return $objGameplay;
@@ -482,9 +578,9 @@ class servicefunctions_dao
 
         $data = array(
 
-            'id_child'     => $childid,
-            'score'      => $score,
-            'datetime_lastupdated'  => $datetime_lastupdated
+            'id_child' => $childid,
+            'score' => $score,
+            'datetime_lastupdated' => $datetime_lastupdated
         );
 
         $rtn = $this->dbh->insertRecords('chm_walletscore_tbl', $data);
@@ -495,9 +591,9 @@ class servicefunctions_dao
     {
 
         $data = array(
-            'id_child'     => $childid,
-            'score'      => $score,
-            'datetime_lastupdated'  => $datetime_lastupdated
+            'id_child' => $childid,
+            'score' => $score,
+            'datetime_lastupdated' => $datetime_lastupdated
         );
 
         $where_condition = "id_child = " . $childid;
