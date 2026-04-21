@@ -41,10 +41,10 @@ function getAccessTokenForChildForDeviceAndGrade($childname, $deviceid, $grade)
     return $servicefunctions_dao->getAccessTokenForChildForDeviceAndGrade($childname, $deviceid, $grade);
 }
 
-function getChildByNameDeviceAndGrade($childname, $deviceid, $grade)
+function getChildByNameAndDeviceAndGrade($childname, $deviceid, $grade)
 {
     $servicefunctions_dao = new servicefunctions_dao();
-    return $servicefunctions_dao->getChildByNameDeviceAndGrade($childname, $deviceid, $grade);
+    return $servicefunctions_dao->getChildByNameAndDeviceAndGrade($childname, $deviceid, $grade);
 }
 
 

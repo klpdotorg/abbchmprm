@@ -75,7 +75,7 @@ if ($childname && $deviceid && $grade) {
     } else {
 
         //    $objChild = getChildByNameAndDevice($childname, $deviceid);
-        $objChild = getChildByNameDeviceAndGrade($childname, $deviceid, $grade);
+        $objChild = getChildByNameAndDeviceAndGrade($childname, $deviceid, $grade);
 
         if (!$objChild) {
 

@@ -56,7 +56,7 @@ if ($data) {
         // if($childname && $deviceid){
 
         // $childid = getChildIdByNameAndDevice($childname, $deviceid);
-        $objChild = getChildByNameDeviceAndGrade($childname, $deviceid, $grade);
+        $objChild = getChildByNameAndDeviceAndGrade($childname, $deviceid, $grade);
 
         if (!$objChild) {
             $responsedata = array(

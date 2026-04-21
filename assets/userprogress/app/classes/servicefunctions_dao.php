@@ -14,24 +14,34 @@ class servicefunctions_dao
 
     function checkIfNameDeviceAndGradeRegistered($childname, $deviceid, $grade)
     {
-        $gradeid = $this->getGradeIdByGradeName($grade);
-        if (!$gradeid)
-            return false;
+        $query = "SELECT C.id_child
+              FROM child_tbl C
+              JOIN grade_tbl G ON C.id_grade = G.id_grade
+              WHERE C.child_name = '$childname'
+              AND C.deviceid = '$deviceid'
+              AND G.description = '$grade'";
 
-        $additional_condition = " AND deviceid = '$deviceid' AND id_grade = '$gradeid'";
-        $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $childname, $additional_condition);
+        $arrResult = $this->dbh->readRecordsWithQuery($query);
 
         if (count($arrResult, 1) == 0)
             return false;
         else
             return true;
+        // $gradeid = $this->getGradeIdByGradeName($grade);
+        // if (!$gradeid)
+        //     return false;
+
+        // $additional_condition = " AND deviceid = '$deviceid' AND id_grade = '$gradeid'";
+        // $arrResult = $this->dbh->readRecords('child_tbl', 'id_child', 'child_name', $childname, $additional_condition);
+
+        // if (count($arrResult, 1) == 0)
+        //     return false;
+        // else
+        //     return true;
     }
 
-    function getChildByNameDeviceAndGrade($childname, $deviceid, $grade)
+    function getChildByNameAndDeviceAndGrade($childname, $deviceid, $grade)
     {
-        $gradeid = $this->getGradeIdByGradeName($grade);
-        if (!$gradeid)
-            return false;
 
         $query = "SELECT C.*, G.description AS gradedescr, L.description AS langdescr
               FROM child_tbl C
@@ -39,7 +49,7 @@ class servicefunctions_dao
               JOIN language_tbl L ON C.id_language = L.id_language
               WHERE C.child_name = '$childname'
               AND C.deviceid = '$deviceid'
-              AND C.id_grade = '$gradeid'";
+              AND G.description = '$grade'";
 
         $arrResult = $this->dbh->readRecordsWithQuery($query);
 
@@ -49,14 +59,14 @@ class servicefunctions_dao
             return $this->createChildObject($arrResult[0]);
     }
 
-    function getGradeIdByGradeName($gradename)
-    {
-        $arrResult = $this->dbh->readRecords('grade_tbl', 'id_grade', 'description', $gradename);
-        if (count($arrResult, 1) == 0)
-            return false;
-        else
-            return $arrResult[0]['id_grade'];
-    }
+    // function getGradeIdByGradeName($gradename)
+    // {
+    //     $arrResult = $this->dbh->readRecords('grade_tbl', 'id_grade', 'description', $gradename);
+    //     if (count($arrResult, 1) == 0)
+    //         return false;
+    //     else
+    //         return $arrResult[0]['id_grade'];
+    // }
 
 
     function checkIfNameAndDeviceRegistered($childname, $deviceid)
@@ -164,13 +174,16 @@ class servicefunctions_dao
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NSD%' AND id_child = '$childid') AS PNSD,
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'NSR%' AND id_child = '$childid') AS PNSR,
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'ALGV%' AND id_child = '$childid') AS PALGV,
-                -- ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'GM%' AND id_child = '$childid') AS PGMS,
+                ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND id_game like 'GM%' AND id_child = '$childid') AS PGMS,
                 ( SELECT COUNT(DISTINCT(id_game)) FROM game_play_tbl WHERE EXISTS (SELECT 1 FROM game_play_detail_tbl WHERE game_play_detail_tbl.id_game_play = game_play_tbl.id_game_play) AND (id_game like 'GMPR%' OR id_game like 'GMM%') AND id_child = '$childid') AS PGMM,";
 
         //challenge mode query
         $query .= "( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid') AS PMST,
                 ( SELECT SUM(time2answer) FROM `chm_game_play_detail_tbl` WHERE id_child = '$childid') AS CMST,
                 ( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid' AND id_question like 'NS%') AS PMNSST,
+                ( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid' AND (id_question like 'NSN%' OR id_question like 'NS%' OR id_question like 'NSD%' OR id_question like 'NSF%' OR id_question like 'NSRP%')) AS PMNST,
+                ( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid' AND id_question like 'AL%') AS PALGT,
+                ( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid' AND (id_question like 'GMS%' OR id_question like 'GMR%' OR id_question like 'GMCR%' OR id_question like 'GMPAR%' OR id_question like 'GMAN%' OR id_question like 'GMLA%')) AS PMGMT,
                 ( SELECT SUM(time2answer) FROM `chm_game_play_detail_tbl` WHERE id_child = '$childid' AND id_question like 'NS%' ) AS CMNSST,
                 ( SELECT SUM(time2answer) FROM `game_play_detail_tbl` WHERE id_child = '$childid' AND id_question like 'NO%') AS PMNOST,
                 ( SELECT SUM(time2answer) FROM `chm_game_play_detail_tbl` WHERE id_child = '$childid' AND id_question like 'NO%' ) AS CMNOST,
@@ -323,7 +336,11 @@ class servicefunctions_dao
         $objGameplay->setPGMS($arrData['PGMS']);
         $objGameplay->setPGMM($arrData['PGMM']);
 
-
+        $objGameplay->setPNSR($arrData['PNSR']);
+        $objGameplay->setPNSI($arrData['PNSI']);
+        $objGameplay->setPNSD($arrData['PNSD']);
+        $objGameplay->setPMNST($arrData['PMNST']);
+        $objGameplay->setPMGMT($arrData['PMGMT']);
 
         $objGameplay->setCNS($arrData['CNS']);
         $objGameplay->setCNO($arrData['CNO']);

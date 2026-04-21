@@ -1,4 +1,3 @@
-
 <?php
 
 // Object corresponding to game_play_tbl
@@ -126,17 +125,17 @@ class userprogress
 	private $CNODH;
 
 	private $PALGT;
-	private $PALG; 
-	private $PGM;           
-	private $PALGV;  
-	private $PGMS;  
-	private $PGMM;  
+	private $PALG;
+	private $PGM;
+	private $PALGV;
+	private $PGMS;
+	private $PGMM;
 
-	private$PMGMT;
-	private$PMNST;
-	private $PNSI; 
-	private $PNSD;      
-	private $PNSR;  
+	private $PMGMT;
+	private $PMNST;
+	private $PNSI;
+	private $PNSD;
+	private $PNSR;
 
 
 	function setPMST($PMST)
@@ -1236,12 +1235,18 @@ class userprogress
 	{
 		$this->PGMM = $PGMM;
 	}
-
+	function setPMGMT($PMGMT)
+	{
+		$this->PMGMT = $PMGMT;
+	}
 	function getPMGMT()
 	{
 		return $this->PMGMT;
 	}
-
+	function setPMNST($PMNST)
+	{
+		$this->PMNST = $PMNST;
+	}
 	function getPMNST()
 	{
 		return $this->PMNST;
@@ -1275,15 +1280,25 @@ class userprogress
 	{
 		return $this->PGMM;
 	}
-
+	function setPNSI($PNSI)
+	{
+		$this->PNSI = $PNSI;
+	}
 	function getPNSI()
 	{
 		return $this->PNSI;
 	}
-
+	function setPNSD($PNSD)
+	{
+		$this->PNSD = $PNSD;
+	}
 	function getPNSD()
 	{
 		return $this->PNSD;
+	}
+	function setPNSR($PNSR)
+	{
+		$this->PNSR = $PNSR;
 	}
 	function getPNSR()
 	{

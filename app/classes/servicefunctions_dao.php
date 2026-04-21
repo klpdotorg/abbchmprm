@@ -69,7 +69,7 @@ class servicefunctions_dao
             return true;
     }
 
-    function getChildByNameDeviceAndGrade($childname, $deviceid, $grade)
+    function getChildByNameAndDeviceAndGrade($childname, $deviceid, $grade)
     {
         $gradeid = $this->getGradeIdByGradeName($grade);
         if (!$gradeid)
@@ -81,7 +81,7 @@ class servicefunctions_dao
               JOIN language_tbl L ON C.id_language = L.id_language
               WHERE C.child_name = '$childname'
               AND C.deviceid = '$deviceid'
-              AND C.id_grade = '$gradeid'";
+              AND G.description = '$grade'";
 
         $arrResult = $this->dbh->readRecordsWithQuery($query);
 

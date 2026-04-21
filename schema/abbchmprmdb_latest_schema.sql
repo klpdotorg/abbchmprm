@@ -3423,3 +3423,10 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+UPDATE abb_db_test.child_tbl
+SET id_grade = 1
+WHERE id_grade != 1;
+
+ALTER TABLE child_tbl
+ADD UNIQUE KEY uk_child_name_device_grade (child_name, deviceid, id_grade);
