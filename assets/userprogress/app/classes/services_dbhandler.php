@@ -54,6 +54,8 @@ class services_dbhandler {
                 } 
                 else {
                     services_dbhandler::$connected = true;
+                    mysqli_query(services_dbhandler::$link, "SET SESSION wait_timeout=300, interactive_timeout=300");
+                    register_shutdown_function(['services_dbhandler', 'staticDisconnect']);
                 }
             }
             catch (exceptionMgr $e) {
@@ -91,6 +93,7 @@ class services_dbhandler {
     
 	    if (services_dbhandler::$connected == true) {
               services_dbhandler::$connected = !mysqli_close(services_dbhandler::$link);
+              services_dbhandler::$instance = null;
               return true;
 	    } 
 	    else {
@@ -111,6 +114,9 @@ class services_dbhandler {
             self::$numRows = $this->lastNumRows();
             self::$lastInsertedId = mysqli_insert_id(services_dbhandler::$link);
             self::$affected = $this->lastAffected();
+            if (!is_object(self::$result)) {
+                self::staticDisconnect();
+            }
             return true;
         } 
         else {
@@ -160,6 +166,7 @@ class services_dbhandler {
             }
 	    
             mysqli_free_result(self::$result);
+            self::staticDisconnect();
             return $arrResult;
         } 
         else {

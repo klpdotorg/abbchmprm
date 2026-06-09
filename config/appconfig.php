@@ -4,7 +4,7 @@
    $cfg_maintenancepage = 'undermaintenance.php';
   
    // Use HTTPS  or not
-   $cfg_usehttps = false;  // On LIVE server always set this to 'true'. While testing on local machines this may be set to false
+   $cfg_usehttps = true;  // On LIVE server always set this to 'true'. While testing on local machines this may be set to false
    
    // for __autoload. The installation directory of the ABS. Used in /app/boot/checksandincludes.php
    $cfg_autoload_includepath_rootdirectory = 'abs'; 

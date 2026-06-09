@@ -54,6 +54,8 @@ class emrp_dbhandler {
                 } 
                 else {
                     emrp_dbhandler::$connected = true;
+                    mysqli_query(emrp_dbhandler::$link, "SET SESSION wait_timeout=300, interactive_timeout=300");
+                    register_shutdown_function(['emrp_dbhandler', 'staticDisconnect']);
                 }
             }
             catch (exceptionMgr $e) {
@@ -91,6 +93,7 @@ class emrp_dbhandler {
     
 	    if (emrp_dbhandler::$connected == true) {
               emrp_dbhandler::$connected = !mysqli_close(emrp_dbhandler::$link);
+              emrp_dbhandler::$instance = null;
               return true;
 	    } 
 	    else {
@@ -111,6 +114,9 @@ class emrp_dbhandler {
             self::$numRows = $this->lastNumRows();
             self::$lastInsertedId = mysqli_insert_id(emrp_dbhandler::$link);
             self::$affected = $this->lastAffected();
+            if (!is_object(self::$result)) {
+                self::staticDisconnect();
+            }
             return true;
         } 
         else {
@@ -160,6 +166,7 @@ class emrp_dbhandler {
             }
 	    
             mysqli_free_result(self::$result);
+            self::staticDisconnect();
             return $arrResult;
         } 
         else {

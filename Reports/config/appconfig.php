@@ -6,7 +6,7 @@ $cfg_maintenance = 'off';
 $cfg_maintenancepage = 'undermaintenance.php';
 
 // Use HTTPS  or not
-$cfg_usehttps = false;  // On LIVE server set this to 'true' (if the server is https enabled). While testing on local machines this may be set to false
+$cfg_usehttps = true;  // On LIVE server set this to 'true' (if the server is https enabled). While testing on local machines this may be set to false
 // This flag is used in main.php (index.php) to decide the base url
 
 // for __autoload. The installation directory of eVidya. Used in /app/boot/checksandincludes.php
